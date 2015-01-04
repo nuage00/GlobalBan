@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SDG;
-using UnityEngine;
-using Rocket.RocketAPI;
-using System.Web.Script.Serialization;
-using Rocket.RocketAPI.Interfaces;
+﻿using SDG;
 
 namespace GlobalBan
 {
-    class CommandUnban : RocketCommand
+    class CommandUnban : Command
     {
-        public void Execute(SteamPlayerID caller, string command)
+        public CommandUnban()
+        {
+            base.commandName = "unban";
+            base.commandInfo = base.commandHelp = "Unbanns a player";
+        }
+
+        public override void execute(SteamPlayerID caller, string command)
         {
             string[] commandArray = command.Split(' ');
 
@@ -32,14 +30,5 @@ namespace GlobalBan
             }
         }
 
-        public string Name
-        {
-            get { return "Unban"; }
-        }
-
-        public string Help
-        {
-            get { return "Unbanns a player"; }
-        }
     }
 }

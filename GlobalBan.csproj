@@ -87,7 +87,7 @@
     <Compile Include="Database.cs" />
     <Compile Include="CommandUnban.cs" />
     <Compile Include="CommandBan.cs" />
-    <Compile Include="Configuration.cs" />
+    <Compile Include="GlobalBanConfiguration.cs" />
     <Compile Include="GlobalBan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

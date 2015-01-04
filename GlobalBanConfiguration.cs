@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GlobalBan
 {
-    public class Configuration
+    public class GlobalBanConfiguration
     {
         public string DatabaseAddress = "localhost";
         public string DatabaseUsername = "unturned";

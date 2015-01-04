@@ -4,42 +4,31 @@ using System.Linq;
 using System.Text;
 using Steamworks;
 using SDG;
-using Rocket.RocketAPI;
 using System.Reflection;
-using Rocket.RocketAPI.Interfaces;
-using Rocket.RocketAPI.Managers;
+using Rocket;
 
 namespace GlobalBan
 {
-    public class GlobalBan : RocketPlugin
+    public class GlobalBan : RocketComponent
     {
-        public static Configuration Configuration = ConfigurationManager.LoadConfiguration<Configuration>();
+        public static GlobalBanConfiguration configuration;
      
-        string RocketPlugin.Author
-        {
-            get { return "fr34kyn01535"; }
-        }
-        
-        void RocketPlugin.Load()
+        public void Load()
         {
             new I18N.West.CP1250();
-            RocketAPI.Commands.RegisterCommand(new CommandBan());
-            RocketAPI.Commands.RegisterCommand(new CommandUnban());
-
-            RocketAPI.Events.PlayerConnected += onPlayerConnected;
-
+            configuration = Configuration.LoadConfiguration<GlobalBanConfiguration>();
             Database.CheckSchema();
         }
 
-        static void onPlayerConnected(CSteamID id)
+        protected override void onPlayerConnected(CSteamID cSteamID)
         {
             try
             {
-                string banned = Database.IsBanned(id.ToString());
+                string banned = Database.IsBanned(cSteamID.ToString());
                 if (banned != null)
                 {
                     if (banned == "") banned = "you are banned, contact the staff if you feel this is a mistake.";
-                    Steam.kick(id, banned);
+                    Steam.kick(cSteamID, banned);
                 }
             }
             catch (Exception)

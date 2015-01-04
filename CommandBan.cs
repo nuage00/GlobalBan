@@ -4,15 +4,19 @@ using System.Linq;
 using System.Text;
 using SDG;
 using UnityEngine;
-using Rocket.RocketAPI;
 using System.Web.Script.Serialization;
-using Rocket.RocketAPI.Interfaces;
 
 namespace GlobalBan
 {
-    class CommandBan : RocketCommand
+    class CommandBan : Command
     {
-        public void Execute(SteamPlayerID caller, string command)
+        public CommandBan()
+        {
+            base.commandName = "ban";
+            base.commandInfo = base.commandHelp = "Banns a player";
+        }
+
+        public override void execute(SteamPlayerID caller, string command)
         {
             string[] commandArray = command.Split(' ');
 
@@ -44,14 +48,5 @@ namespace GlobalBan
             }
         }
 
-        public string Name
-        {
-            get { return "Ban"; }
-        }
-
-        public string Help
-        {
-            get { return "Banns a player"; }
-        }
     }
 }
