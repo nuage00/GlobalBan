@@ -10,7 +10,7 @@ namespace GlobalBan
             base.commandInfo = base.commandHelp = "Unbanns a player";
         }
 
-        public override void execute(SteamPlayerID caller, string command)
+        protected override void execute(SteamPlayerID caller, string command)
         {
             string[] commandArray = command.Split(' ');
 
