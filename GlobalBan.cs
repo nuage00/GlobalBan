@@ -13,7 +13,7 @@ namespace GlobalBan
     {
         public static GlobalBanConfiguration configuration;
      
-        public void Load()
+        protected override void Load()
         {
             new I18N.West.CP1250();
             configuration = Configuration.LoadConfiguration<GlobalBanConfiguration>();
