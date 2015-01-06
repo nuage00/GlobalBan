@@ -6,24 +6,24 @@ using Steamworks;
 using SDG;
 using System.Reflection;
 using Rocket;
+using Rocket.RocketAPI;
 
-namespace GlobalBan
+namespace unturned.ROCKS.GlobalBan
 {
-    public class GlobalBan : RocketComponent
+    public class GlobalBan : RocketPlugin<GlobalBanConfiguration>
     {
-        public static GlobalBanConfiguration configuration;
-     
         protected override void Load()
         {
             new I18N.West.CP1250();
-            configuration = Configuration.LoadConfiguration<GlobalBanConfiguration>();
             Database.CheckSchema();
+            Events.OnPlayerConnected += Events_OnPlayerConnected;
         }
 
-        protected override void onPlayerConnected(CSteamID cSteamID)
+        public void Events_OnPlayerConnected(Player player)
         {
             try
             {
+                CSteamID cSteamID = player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID;
                 string banned = Database.IsBanned(cSteamID.ToString());
                 if (banned != null)
                 {

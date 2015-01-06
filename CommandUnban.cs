@@ -1,33 +1,28 @@
-﻿using SDG;
+﻿using Rocket.RocketAPI;
+using SDG;
 
-namespace GlobalBan
+namespace unturned.ROCKS.GlobalBan
 {
     class CommandUnban : Command
     {
         public CommandUnban()
         {
             base.commandName = "unban";
-            base.commandInfo = base.commandHelp = "Unbanns a player";
+            base.commandHelp = "Unbanns a player";
+            base.commandInfo = commandName + " - " + commandHelp;
         }
 
         protected override void execute(SteamPlayerID caller, string command)
         {
-            string[] commandArray = command.Split(' ');
-
-            if (commandArray.Length < 2)
+            SteamPlayerID steamPlayerID = null;
+            if (!SteamPlayerlist.tryGetPlayer(command, out steamPlayerID))
             {
-                ChatManager.say(caller.CSteamId, "Missing arguments");
+                RocketChat.Say(caller.CSteamID, this.Local.format("NoPlayerErrorText", new object[] { command }));
                 return;
             }
 
-            SteamPlayerID steamPlayerID;
-            if (SteamPlayerlist.tryGetPlayer(commandArray[1], out steamPlayerID))
-            {
-                Database.UnbanPlayer(steamPlayerID.CSteamId.ToString());
-                ChatManager.say("Unbanned " + steamPlayerID.IngameName);
-            }else{
-                ChatManager.say(caller.CSteamId,"Failed to find player");
-            }
+            Database.UnbanPlayer(steamPlayerID.CSteamID.ToString());
+            RocketChat.Say(this.Local.format("UnbanText", new object[] { steamPlayerID.SteamName }));
         }
 
     }
