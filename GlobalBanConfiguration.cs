@@ -1,16 +1,30 @@
-﻿using System;
+﻿using Rocket.RocketAPI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    public class GlobalBanConfiguration
+    public class GlobalBanConfiguration : RocketConfiguration
     {
-        public string DatabaseAddress = "localhost";
-        public string DatabaseUsername = "unturned";
-        public string DatabasePassword = "password";
-        public string DatabaseName = "unturned";
-        public string DatabaseTableName = "banlist";
+        public string DatabaseAddress;
+        public string DatabaseUsername;
+        public string DatabasePassword;
+        public string DatabaseName;
+        public string DatabaseTableName;
+
+        public RocketConfiguration DefaultConfiguration
+        {
+            get {
+                GlobalBanConfiguration config = new GlobalBanConfiguration();
+                config.DatabaseAddress = "localhost";
+                config.DatabaseUsername = "unturned";
+                config.DatabasePassword = "password";
+                config.DatabaseName = "unturned";
+                config.DatabaseTableName = "banlist";
+                return config;
+            }
+        }
     }
 }
