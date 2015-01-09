@@ -1,5 +1,6 @@
 ﻿using Rocket.RocketAPI;
 using SDG;
+using System;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -15,7 +16,7 @@ namespace unturned.ROCKS.GlobalBan
         protected override void execute(SteamPlayerID caller, string command)
         {
             SteamPlayerID steamPlayerID = null;
-            if (!SteamPlayerlist.tryGetPlayer(command, out steamPlayerID))
+            if (String.IsNullOrEmpty(command) || !SteamPlayerlist.tryGetPlayer(command, out steamPlayerID))
             {
                 RocketChatManager.Say(caller.CSteamID, "Player not found");
                 return;
