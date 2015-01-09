@@ -17,12 +17,12 @@ namespace unturned.ROCKS.GlobalBan
             SteamPlayerID steamPlayerID = null;
             if (!SteamPlayerlist.tryGetPlayer(command, out steamPlayerID))
             {
-                RocketChat.Say(caller.CSteamID, this.Local.format("NoPlayerErrorText", new object[] { command }));
+                RocketChatManager.Say(caller.CSteamID, "Player not found");
                 return;
             }
 
             Database.UnbanPlayer(steamPlayerID.CSteamID.ToString());
-            RocketChat.Say(this.Local.format("UnbanText", new object[] { steamPlayerID.SteamName }));
+            RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was unbanned");
         }
 
     }

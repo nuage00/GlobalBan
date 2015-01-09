@@ -20,32 +20,27 @@ namespace unturned.ROCKS.GlobalBan
 
         protected override void execute(SteamPlayerID caller, string command)
         {
-            RocketChat.Say("test");
-            Logger.Log(command);
             SteamPlayerID steamPlayerID = null; ;
             string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
             if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
             {
-                Logger.Log("1");
-                RocketChat.Say(caller.CSteamID,this.Local.format("InvalidParameterErrorText"));
+                RocketChatManager.Say(caller.CSteamID,"Invalid parameter");
                 return;
             }
             if (!SteamPlayerlist.tryGetPlayer(componentsFromSerial[0], out steamPlayerID))
             {
-                Logger.Log("2");
-                RocketChat.Say(caller.CSteamID, this.Local.format("NoPlayerErrorText", new object[] { componentsFromSerial[0] }));
+                RocketChatManager.Say(caller.CSteamID, "Player not found");
                 return;
             }
             if ((int)componentsFromSerial.Length == 1)
             {
-                Logger.Log("3");
                 Database.BanPlayer(steamPlayerID.CSteamID.ToString(),caller.CSteamID.ToString(),"");
-                RocketChat.Say(this.Local.format("BanTextPermanent", new object[] { steamPlayerID.SteamName }));
+                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned");
             }
             else
             {
-                Database.BanPlayer(steamPlayerID.CSteamID.ToString(),caller.CSteamID.ToString(),componentsFromSerial[1]);
-                RocketChat.Say(this.Local.format("BanTextPermanent", new object[] { steamPlayerID.SteamName }));
+                Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
+                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned for: " + componentsFromSerial[2]);
             }
         }
     }
