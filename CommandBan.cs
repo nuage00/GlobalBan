@@ -36,12 +36,16 @@ namespace unturned.ROCKS.GlobalBan
             {
                 Database.BanPlayer(steamPlayerID.CSteamID.ToString(),caller.CSteamID.ToString(),"");
                 RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned");
+                Steam.kick(steamPlayerID.CSteamID, "");
             }
             else
             {
                 Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
                 RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned for: " + componentsFromSerial[2]);
+                Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[2]);
             }
+
+
         }
     }
 }
