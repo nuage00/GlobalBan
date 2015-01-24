@@ -22,7 +22,7 @@ namespace unturned.ROCKS.GlobalBan
         {
             SteamPlayerID steamPlayerID = null; ;
             string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
-            if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
+            if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 3)
             {
                 RocketChatManager.Say(caller.CSteamID,"Invalid parameter");
                 return;
@@ -32,17 +32,18 @@ namespace unturned.ROCKS.GlobalBan
                 RocketChatManager.Say(caller.CSteamID, "Player not found");
                 return;
             }
-            if ((int)componentsFromSerial.Length == 1)
-            {
-                Database.BanPlayer(steamPlayerID.CSteamID.ToString(),caller.CSteamID.ToString(),"");
-                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned");
-                Steam.kick(steamPlayerID.CSteamID, "");
-            }
-            else
+
+            if (componentsFromSerial.Length >= 3)
             {
                 Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
                 RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned for: " + componentsFromSerial[2]);
                 Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[2]);
+            }
+            else
+            {
+                Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), "");
+                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned");
+                Steam.kick(steamPlayerID.CSteamID, "");
             }
 
 
