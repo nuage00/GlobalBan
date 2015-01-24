@@ -23,8 +23,6 @@ namespace unturned.ROCKS.GlobalBan
             SteamPlayerID steamPlayerID = null; ;
             string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
 
-            Logger.Log("s"+componentsFromSerial.Length);
-
             if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
             {
                 RocketChatManager.Say(caller.CSteamID,"Invalid parameter");
