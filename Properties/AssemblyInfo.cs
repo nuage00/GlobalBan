@@ -6,4 +6,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("GlobalBan")]
 [assembly: AssemblyCopyright("Copyright © 2014")]
 [assembly: Guid("34ca52ac-333c-45df-8a77-8c8f7c463faa")]
-[assembly: AssemblyVersion("1.3.0.0")]
+[assembly: AssemblyVersion("1.4.0.0")]
