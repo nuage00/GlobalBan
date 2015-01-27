@@ -16,7 +16,7 @@ namespace unturned.ROCKS.GlobalBan
         {
             new I18N.West.CP1250();
             Database.CheckSchema();
-            RocketServer.OnPlayerConnected += Events_OnPlayerConnected;
+            RocketEvents.OnPlayerConnected += Events_OnPlayerConnected;
         }
 
         public void Events_OnPlayerConnected(Player player)
