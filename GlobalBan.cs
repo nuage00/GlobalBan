@@ -12,10 +12,10 @@ namespace unturned.ROCKS.GlobalBan
 {
     public class GlobalBan : RocketPlugin<GlobalBanConfiguration>
     {
+        public static DatabaseManager Database;
         protected override void Load()
         {
-            new I18N.West.CP1250();
-            Database.CheckSchema();
+            Database = new DatabaseManager();
             RocketEvents.OnPlayerConnected += Events_OnPlayerConnected;
         }
 

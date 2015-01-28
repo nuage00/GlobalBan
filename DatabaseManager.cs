@@ -5,9 +5,15 @@ using System;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    class Database
+    public class DatabaseManager
     {
-        private static MySqlConnection createConnection()
+        public DatabaseManager()
+        {
+            new I18N.West.CP1250();
+            CheckSchema();
+        }
+
+        private MySqlConnection createConnection()
         {
             MySqlConnection connection = null;
             try
@@ -22,7 +28,7 @@ namespace unturned.ROCKS.GlobalBan
             return connection;
         }
 
-        public static string IsBanned(string steamId)
+        public string IsBanned(string steamId)
         {
             string output = null;
             try
@@ -42,7 +48,7 @@ namespace unturned.ROCKS.GlobalBan
             return output;
         }
 
-        public static void CheckSchema()
+        public void CheckSchema()
         {
             try
             {
@@ -65,7 +71,7 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public static void BanPlayer(string steamId,string admin, string banMessage)
+        public void BanPlayer(string steamId,string admin, string banMessage)
         {
             try
             {
@@ -83,7 +89,7 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public static void UnbanPlayer(string steamId)
+        public void UnbanPlayer(string steamId)
         {
             try
             {

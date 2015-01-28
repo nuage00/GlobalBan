@@ -84,7 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Database.cs" />
+    <Compile Include="DatabaseManager.cs" />
     <Compile Include="CommandUnban.cs" />
     <Compile Include="CommandBan.cs" />
     <Compile Include="GlobalBanConfiguration.cs" />
