@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Rocket.RocketAPI;
 using SDG;
-using UnityEngine;
-using System.Web.Script.Serialization;
-using Rocket.RocketAPI;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -36,18 +30,16 @@ namespace unturned.ROCKS.GlobalBan
 
             if (componentsFromSerial.Length >= 2)
             {
-                GlobalBan.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
+                GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
                 RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned for: " + componentsFromSerial[1]);
                 Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
             }
             else
             {
-                GlobalBan.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), "");
+                GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), "");
                 RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was banned");
                 Steam.kick(steamPlayerID.CSteamID, "you were banned from the server");
             }
-
-
         }
     }
 }

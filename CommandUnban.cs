@@ -22,7 +22,7 @@ namespace unturned.ROCKS.GlobalBan
                 return;
             }
 
-            GlobalBan.Database.UnbanPlayer(steamPlayerID.CSteamID.ToString());
+            GlobalBan.Instance.Database.UnbanPlayer(steamPlayerID.CSteamID.ToString());
             RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was unbanned");
         }
 

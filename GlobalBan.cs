@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Steamworks;
+﻿using Rocket.RocketAPI;
 using SDG;
-using System.Reflection;
-using Rocket;
-using Rocket.RocketAPI;
+using Steamworks;
+using System;
 
 namespace unturned.ROCKS.GlobalBan
 {
     public class GlobalBan : RocketPlugin<GlobalBanConfiguration>
     {
-        public static DatabaseManager Database;
+        public static GlobalBan Instance;
+        public DatabaseManager Database;
         protected override void Load()
         {
+            Instance = this;
             Database = new DatabaseManager();
             RocketEvents.OnPlayerConnected += Events_OnPlayerConnected;
         }

@@ -65,9 +65,8 @@
       <HintPath>Libraries\MySql.Data.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="RocketAPI, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\RocketAPI.dll</HintPath>
+    <Reference Include="RocketAPI">
+      <HintPath>..\..\..\Desktop\Unturned\Unturned_Data\Managed\RocketAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -92,6 +91,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Libraries\System.Management.dll" />
     <Content Include="lib\Assembly-CSharp-firstpass.dll" />
     <Content Include="lib\Assembly-CSharp.dll" />
     <Content Include="Libraries\I18N.dll">
@@ -103,7 +103,6 @@
     <Content Include="Libraries\MySql.Data.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\RocketAPI.dll" />
     <Content Include="Libraries\System.Data.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
