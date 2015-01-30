@@ -109,6 +109,7 @@
     <Content Include="Libraries\System.Transactions.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="lib\RocketAPI.dll" />
     <Content Include="lib\UnityEngine.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
