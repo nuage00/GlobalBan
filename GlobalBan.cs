@@ -1,4 +1,5 @@
 ﻿using Rocket.RocketAPI;
+using Rocket.RocketAPI.Events;
 using SDG;
 using Steamworks;
 using System;
@@ -13,7 +14,7 @@ namespace unturned.ROCKS.GlobalBan
         {
             Instance = this;
             Database = new DatabaseManager();
-            RocketEvents.OnPlayerConnected += Events_OnPlayerConnected;
+            RocketServerEvents.OnPlayerConnected += Events_OnPlayerConnected;
         }
 
         public void Events_OnPlayerConnected(Player player)
