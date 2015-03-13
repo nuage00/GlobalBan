@@ -18,7 +18,7 @@ namespace unturned.ROCKS.GlobalBan
             SteamPlayerID steamPlayerID = null;
             if (String.IsNullOrEmpty(command) || !SteamPlayerlist.tryGetPlayer(command, out steamPlayerID))
             {
-                RocketChatManager.Say(caller.CSteamID, "Player not found");
+                RocketChatManager.Say(caller.CSteamID, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
 

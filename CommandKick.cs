@@ -19,26 +19,26 @@ namespace unturned.ROCKS.GlobalBan
 
             if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
             {
-                RocketChatManager.Say(caller.CSteamID,"Invalid parameter");
+                RocketChatManager.Say(caller.CSteamID, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
             if (!SteamPlayerlist.tryGetPlayer(componentsFromSerial[0], out steamPlayerID))
             {
-                RocketChatManager.Say(caller.CSteamID, "Player not found");
+                RocketChatManager.Say(caller.CSteamID, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
 
             if (componentsFromSerial.Length >= 2)
             {
                 GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), componentsFromSerial[1]);
-                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was kicked for: " + componentsFromSerial[1]);
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public_reason", steamPlayerID.SteamName, componentsFromSerial[1]));
                 Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
             }
             else
             {
                 GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.CSteamID.ToString(), "");
-                RocketChatManager.Say("The player " + steamPlayerID.SteamName + " was kicked");
-                Steam.kick(steamPlayerID.CSteamID, "you were kicked from the server");
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public", steamPlayerID.SteamName));
+                Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_kick_private_default_reason"));
             }
         }
     }
