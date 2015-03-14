@@ -23,7 +23,6 @@ namespace unturned.ROCKS.GlobalBan
             {
                 return new System.Collections.Generic.Dictionary<string, string>() {
                     {"default_banmessage","you are banned, contact the staff if you feel this is a mistake."},
-                    {"default_banmessage","you are banned, contact the staff if you feel this is a mistake."},
                     {"command_generic_invalid_parameter","Invalid parameter"},
                     {"command_generic_player_not_found","Player not found"},
                     {"command_ban_public_reason", "The player {0} was banned for: {1}"},
