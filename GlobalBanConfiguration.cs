@@ -9,6 +9,7 @@ namespace unturned.ROCKS.GlobalBan
         public string DatabasePassword;
         public string DatabaseName;
         public string DatabaseTableName;
+        public int DatabasePort;
 
         public RocketConfiguration DefaultConfiguration
         {
@@ -19,6 +20,7 @@ namespace unturned.ROCKS.GlobalBan
                 config.DatabasePassword = "password";
                 config.DatabaseName = "unturned";
                 config.DatabaseTableName = "banlist";
+                config.DatabasePort = 3306;
                 return config;
             }
         }

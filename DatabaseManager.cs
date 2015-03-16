@@ -18,8 +18,8 @@ namespace unturned.ROCKS.GlobalBan
             MySqlConnection connection = null;
             try
             {
-                connection = new MySqlConnection(String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};", GlobalBan.Instance.Configuration.DatabaseAddress, GlobalBan.Instance.Configuration.DatabaseName, GlobalBan.Instance.Configuration.DatabaseUsername, GlobalBan.Instance.Configuration.DatabasePassword));
-                return connection;
+                if (GlobalBan.Instance.Configuration.DatabasePort == 0) GlobalBan.Instance.Configuration.DatabasePort = 3306;
+                connection = new MySqlConnection(String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GlobalBan.Instance.Configuration.DatabaseAddress, GlobalBan.Instance.Configuration.DatabaseName, GlobalBan.Instance.Configuration.DatabaseUsername, GlobalBan.Instance.Configuration.DatabasePassword, GlobalBan.Instance.Configuration.DatabasePort));
             }
             catch (Exception ex)
             {
