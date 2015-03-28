@@ -6,14 +6,22 @@ namespace unturned.ROCKS.GlobalBan
 {
     class CommandUnban : Command
     {
-        public CommandUnban()
+        public string Help
         {
-            base.commandName = "unban";
-            base.commandHelp = "Unbanns a player";
-            base.commandInfo = commandName + " - " + commandHelp;
+            get { return "Unbanns a player"; }
         }
 
-        protected override void execute(SteamPlayerID caller, string command)
+        public string Name
+        {
+            get { return "unban"; }
+        }
+
+        public bool RunFromConsole
+        {
+            get { return true; }
+        }
+
+        public void Execute(Steamworks.CSteamID caller, string command)
         {
             SteamPlayer steamPlayer = null;
             if (String.IsNullOrEmpty(command) || !PlayerTool.tryGetSteamPlayer(command, out steamPlayer))
