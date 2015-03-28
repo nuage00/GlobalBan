@@ -3,24 +3,24 @@ using SDG;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    class CommandKick : IRocketCommand
+    public class CommandKick : IRocketCommand
     {
-        string Help
+        string IRocketCommand.Help
         {
             get { return "Kicks a player"; }
         }
 
-        string Name
+        string IRocketCommand.Name
         {
             get { return "kick"; }
         }
 
-        bool RunFromConsole
+        bool IRocketCommand.RunFromConsole
         {
             get { return false; }
         }
 
-        void Execute(Steamworks.CSteamID caller, string command)
+        void IRocketCommand.Execute(Steamworks.CSteamID caller, string command)
         {
             SteamPlayer steamPlayer = null;
             SteamPlayerID steamPlayerID = null;
