@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Logging;
 using Rocket.RocketAPI;
+using SDG;
 using System;
 
 namespace unturned.ROCKS.GlobalBan
@@ -60,7 +61,7 @@ namespace unturned.ROCKS.GlobalBan
 
                 if (test == null)
                 {
-                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(255) DEFAULT NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
+                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`steamname` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
                     command.ExecuteNonQuery();
                 }
                 connection.Close();
@@ -71,14 +72,19 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public void BanPlayer(string steamId,string admin, string banMessage)
+        public void BanPlayer(SteamPlayerID player,string admin, string banMessage)
         {
             try
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
                 if (banMessage == null) banMessage = "";
-                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`banTime`) values('" + steamId + "','" + admin + "','" + banMessage + "',now());";
+                command.Parameters.AddWithValue("@csteamid", player.CSteamID);
+                command.Parameters.AddWithValue("@admin", admin);
+                command.Parameters.AddWithValue("@charactername", player.CharacterName);
+                command.Parameters.AddWithValue("@steamname", player.SteamName);
+                command.Parameters.AddWithValue("@banMessage", banMessage);
+                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`steamname`,`banTime`) values(@csteamid,@admin,@charactername,@steamname,@banMessage,now());";
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -89,13 +95,14 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public void UnbanPlayer(string steamId)
+        public void UnbanPlayer(string player)
         {
             try
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "delete from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` = '" + steamId + "';";
+                command.Parameters.AddWithValue("@player", "%"+player+"%");
+                command.CommandText = "delete from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` like @player or `charactername` like = '%@player%' or `steamname` like = '%@player%' limit 1;";
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();

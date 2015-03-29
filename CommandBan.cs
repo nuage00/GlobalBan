@@ -3,7 +3,7 @@ using SDG;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    class CommandBan : IRocketCommand
+    public class CommandBan : IRocketCommand
     {
         public string Help
         {
@@ -39,13 +39,13 @@ namespace unturned.ROCKS.GlobalBan
             steamPlayerID = steamPlayer.SteamPlayerID;
             if (componentsFromSerial.Length >= 2)
             {
-                GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.ToString(), componentsFromSerial[1]);
+                GlobalBan.Instance.Database.BanPlayer(steamPlayerID, caller.ToString(), componentsFromSerial[1]);
                 RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", steamPlayerID.SteamName, componentsFromSerial[1]));
                 Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
             }
             else
             {
-                GlobalBan.Instance.Database.BanPlayer(steamPlayerID.CSteamID.ToString(), caller.ToString(), "");
+                GlobalBan.Instance.Database.BanPlayer(steamPlayerID, caller.ToString(), "");
                 RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public", steamPlayerID.SteamName));
                 Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }

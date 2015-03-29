@@ -4,7 +4,7 @@ using System;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    class CommandUnban : Command
+    public class CommandUnban : IRocketCommand
     {
         public string Help
         {
