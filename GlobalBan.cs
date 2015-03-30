@@ -3,6 +3,7 @@ using Rocket.RocketAPI.Events;
 using SDG;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -10,6 +11,9 @@ namespace unturned.ROCKS.GlobalBan
     {
         public static GlobalBan Instance;
         public DatabaseManager Database;
+
+        public static Dictionary<string, string> Players = new Dictionary<string,string>();
+
         protected override void Load()
         {
             Instance = this;
@@ -35,8 +39,21 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
+        public static KeyValuePair<string, string> GetPlayer(string search) {
+            foreach (KeyValuePair<string, string> pair in Players) {
+                if (pair.Key.ToLower().Contains(search.ToLower()) || pair.Value.ToLower().Contains(search.ToLower()))
+                {
+                    return pair;
+                }
+            }
+            return new KeyValuePair<string, string>(null,null);
+        }
+
         public void Events_OnPlayerConnected(Player player)
         {
+            if (!Players.ContainsKey(player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID.ToString()))
+                Players.Add(player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID.ToString(), player.SteamChannel.SteamPlayer.SteamPlayerID.CharacterName);
+
             try
             {
                 CSteamID cSteamID = player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID;

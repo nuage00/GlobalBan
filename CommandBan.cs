@@ -1,5 +1,7 @@
-﻿using Rocket.RocketAPI;
+﻿using Rocket.Logging;
+using Rocket.RocketAPI;
 using SDG;
+using System.Collections.Generic;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -22,7 +24,7 @@ namespace unturned.ROCKS.GlobalBan
 
         public void Execute(Steamworks.CSteamID caller, string command)
         {
-            SteamPlayer steamPlayer = null;
+            SteamPlayer otherSteamPlayer = null;
             SteamPlayerID steamPlayerID = null;
             string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
 
@@ -31,23 +33,52 @@ namespace unturned.ROCKS.GlobalBan
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
-            if (!PlayerTool.tryGetSteamPlayer(componentsFromSerial[0], out steamPlayer))
+
+            bool isOnline = false;
+            string steamid = null;
+            string charactername = null;
+            Logger.Log("1");
+            if (!PlayerTool.tryGetSteamPlayer(componentsFromSerial[0], out otherSteamPlayer))
             {
-                RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                return;
-            }
-            steamPlayerID = steamPlayer.SteamPlayerID;
-            if (componentsFromSerial.Length >= 2)
-            {
-                GlobalBan.Instance.Database.BanPlayer(steamPlayerID, caller.ToString(), componentsFromSerial[1]);
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", steamPlayerID.SteamName, componentsFromSerial[1]));
-                Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
+                Logger.Log("2");
+                KeyValuePair<string, string> player = GlobalBan.GetPlayer(command);
+                Logger.Log("3");
+                if (player.Key != null)
+                {
+                    Logger.Log("4");
+                    steamid = player.Key;
+                    charactername = player.Value;
+                }
+                else
+                {
+                    RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                    return;
+                }
             }
             else
             {
-                GlobalBan.Instance.Database.BanPlayer(steamPlayerID, caller.ToString(), "");
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public", steamPlayerID.SteamName));
-                Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                isOnline = true;
+                steamid = otherSteamPlayer.SteamPlayerID.CSteamID.ToString();
+                charactername = otherSteamPlayer.SteamPlayerID.CharacterName;
+            }
+
+            if (componentsFromSerial.Length >= 2)
+            {
+                Logger.Log("5");
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), componentsFromSerial[1]);
+                Logger.Log("6");
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, componentsFromSerial[1]));
+                if (isOnline)
+                    Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
+            }
+            else
+            {
+                Logger.Log("5");
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), "");
+                Logger.Log("6");
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
+                if (isOnline)
+                    Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }
         }
     }

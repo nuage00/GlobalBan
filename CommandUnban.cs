@@ -23,15 +23,16 @@ namespace unturned.ROCKS.GlobalBan
 
         public void Execute(Steamworks.CSteamID caller, string command)
         {
-            SteamPlayer steamPlayer = null;
-            if (String.IsNullOrEmpty(command) || !PlayerTool.tryGetSteamPlayer(command, out steamPlayer))
+            string name = GlobalBan.Instance.Database.UnbanPlayer(command);
+            if (String.IsNullOrEmpty(name))
             {
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
-
-            GlobalBan.Instance.Database.UnbanPlayer(steamPlayer.SteamPlayerID.CSteamID.ToString());
-            RocketChatManager.Say("The player " + steamPlayer.SteamPlayerID.SteamName + " was unbanned");
+            else
+            {
+                RocketChatManager.Say("The player " + name + " was unbanned");
+            }
         }
 
     }
