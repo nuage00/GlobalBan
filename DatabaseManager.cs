@@ -36,7 +36,7 @@ namespace unturned.ROCKS.GlobalBan
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "select `banMessage` from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` = '" + steamId + "';";
+                command.CommandText = "select `banMessage` from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
                 connection.Open();
                 object result = command.ExecuteScalar();
                 if (result != null) output = result.ToString();
@@ -61,7 +61,7 @@ namespace unturned.ROCKS.GlobalBan
 
                 if (test == null)
                 {
-                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
+                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
                     command.ExecuteNonQuery();
                 }
                 connection.Close();
@@ -72,10 +72,11 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public void BanPlayer(string characterName, string steamid, string admin, string banMessage)
+        public void BanPlayer(string characterName, string steamid, string admin, string banMessage, int duration)
         {
             try
             {
+
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
                 if (banMessage == null) banMessage = "";
@@ -83,7 +84,15 @@ namespace unturned.ROCKS.GlobalBan
                 command.Parameters.AddWithValue("@admin", admin);
                 command.Parameters.AddWithValue("@charactername", characterName);
                 command.Parameters.AddWithValue("@banMessage", banMessage);
-                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`) values(@csteamid,@admin,@banMessage,@charactername,now());";
+                if (duration == 0)
+                {
+                    command.Parameters.AddWithValue("@banDuration", DBNull.Value);
+                }
+                else
+                {
+                    command.Parameters.AddWithValue("@banDuration", duration);
+                }
+                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -94,8 +103,12 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
+        public class UnbanResult {
+            public ulong Id;
+            public string Name;
+        }
 
-        public string UnbanPlayer(string player)
+        public UnbanResult UnbanPlayer(string player)
         {
             try
             {
@@ -108,7 +121,7 @@ namespace unturned.ROCKS.GlobalBan
                 MySqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    string steamId = reader.GetString(0);
+                    ulong steamId = reader.GetUInt64(0);
                     string charactername = reader.GetString(1);
                     connection.Close();
                     command = connection.CreateCommand();
@@ -117,7 +130,7 @@ namespace unturned.ROCKS.GlobalBan
                     connection.Open();
                     command.ExecuteNonQuery();
                     connection.Close();
-                    return charactername;
+                    return new UnbanResult() { Id = steamId, Name = charactername };
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using Rocket.RocketAPI;
 using SDG;
+using Steamworks;
 using System;
 
 namespace unturned.ROCKS.GlobalBan
@@ -21,10 +22,10 @@ namespace unturned.ROCKS.GlobalBan
             get { return true; }
         }
 
-        public void Execute(Steamworks.CSteamID caller, string command)
+        public void Execute(RocketPlayer caller, string command)
         {
-            string name = GlobalBan.Instance.Database.UnbanPlayer(command);
-            if (String.IsNullOrEmpty(name))
+            unturned.ROCKS.GlobalBan.DatabaseManager.UnbanResult name = GlobalBan.Instance.Database.UnbanPlayer(command);
+            if (!SteamBlacklist.unban(new CSteamID(name.Id)) && String.IsNullOrEmpty(name.Name))
             {
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;

@@ -49,14 +49,14 @@ namespace unturned.ROCKS.GlobalBan
             return new KeyValuePair<string, string>(null,null);
         }
 
-        public void Events_OnPlayerConnected(Player player)
+        public void Events_OnPlayerConnected(RocketPlayer player)
         {
-            if (!Players.ContainsKey(player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID.ToString()))
-                Players.Add(player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID.ToString(), player.SteamChannel.SteamPlayer.SteamPlayerID.CharacterName);
+            if (!Players.ContainsKey(player.CSteamID.ToString()))
+                Players.Add(player.CSteamID.ToString(), player.CharacterName);
 
             try
             {
-                CSteamID cSteamID = player.SteamChannel.SteamPlayer.SteamPlayerID.CSteamID;
+                CSteamID cSteamID = player.CSteamID;
                 string banned = Database.IsBanned(cSteamID.ToString());
                 if (banned != null)
                 {
