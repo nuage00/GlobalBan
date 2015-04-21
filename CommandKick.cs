@@ -17,7 +17,7 @@ namespace unturned.ROCKS.GlobalBan
 
         public bool RunFromConsole
         {
-            get { return false; }
+            get { return true; }
         }
 
         public void Execute(RocketPlayer caller, string command)
