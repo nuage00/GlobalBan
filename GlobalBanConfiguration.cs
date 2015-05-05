@@ -2,7 +2,7 @@
 
 namespace unturned.ROCKS.GlobalBan
 {
-    public class GlobalBanConfiguration : RocketConfiguration
+    public class GlobalBanConfiguration : IRocketConfiguration
     {
         public string DatabaseAddress;
         public string DatabaseUsername;
@@ -11,7 +11,7 @@ namespace unturned.ROCKS.GlobalBan
         public string DatabaseTableName;
         public int DatabasePort;
 
-        public RocketConfiguration DefaultConfiguration
+        public IRocketConfiguration DefaultConfiguration
         {
             get {
                 GlobalBanConfiguration config = new GlobalBanConfiguration();
