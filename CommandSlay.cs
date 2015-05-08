@@ -22,13 +22,12 @@ namespace unturned.ROCKS.GlobalBan
             get { return true; }
         }
 
-        public void Execute(RocketPlayer caller, string command)
+        public void Execute(RocketPlayer caller, params string[] command)
         {
             SteamPlayer otherSteamPlayer = null;
             SteamPlayerID steamPlayerID = null;
-            string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
 
-            if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
+            if (command.Length == 0 || command.Length > 2)
             {
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
@@ -37,9 +36,9 @@ namespace unturned.ROCKS.GlobalBan
             bool isOnline = false;
             string steamid = null;
             string charactername = null;
-            if (!PlayerTool.tryGetSteamPlayer(componentsFromSerial[0], out otherSteamPlayer))
+            if (!PlayerTool.tryGetSteamPlayer(command[0], out otherSteamPlayer))
             {
-                KeyValuePair<string, string> player = GlobalBan.GetPlayer(command);
+                KeyValuePair<string, string> player = GlobalBan.GetPlayer(command[0]);
                 if (player.Key != null)
                 {
                     steamid = player.Key;
@@ -58,12 +57,12 @@ namespace unturned.ROCKS.GlobalBan
                 charactername = otherSteamPlayer.SteamPlayerID.CharacterName;
             }
 
-            if (componentsFromSerial.Length >= 2)
+            if (command.Length >= 2)
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), componentsFromSerial[1],31536000);
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, componentsFromSerial[1]));
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), command[1], 31536000);
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
-                    Steam.kick(steamPlayerID.CSteamID, componentsFromSerial[1]);
+                    Steam.kick(steamPlayerID.CSteamID, command[1]);
             }
             else
             {

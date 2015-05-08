@@ -20,25 +20,24 @@ namespace unturned.ROCKS.GlobalBan
             get { return true; }
         }
 
-        public void Execute(RocketPlayer caller, string command)
+        public void Execute(RocketPlayer caller, params string[] command)
         {
-            string[] componentsFromSerial = Parser.getComponentsFromSerial(command, '/');
 
-            if (componentsFromSerial.Length == 0 ||componentsFromSerial.Length > 2)
+            if (command.Length == 0 || command.Length > 2)
             {
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
-            RocketPlayer playerToKick = RocketPlayer.FromName(componentsFromSerial[0]);
+            RocketPlayer playerToKick = RocketPlayer.FromName(command[0]);
             if (playerToKick == null)
             {
                 RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
-            if (componentsFromSerial.Length >= 2)
+            if (command.Length >= 2)
             {
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, componentsFromSerial[1]));
-                Steam.kick(playerToKick.CSteamID, componentsFromSerial[1]);
+                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
+                Steam.kick(playerToKick.CSteamID, command[1]);
             }
             else
             {
