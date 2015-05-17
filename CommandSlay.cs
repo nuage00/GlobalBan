@@ -1,5 +1,6 @@
-﻿using Rocket.Logging;
-using Rocket.RocketAPI;
+﻿using Rocket.Unturned;
+using Rocket.Unturned.Commands;
+using Rocket.Unturned.Player;
 using SDG;
 using System.Collections.Generic;
 
@@ -29,7 +30,7 @@ namespace unturned.ROCKS.GlobalBan
 
             if (command.Length == 0 || command.Length > 2)
             {
-                RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
 
@@ -46,7 +47,7 @@ namespace unturned.ROCKS.GlobalBan
                 }
                 else
                 {
-                    RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                    RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                     return;
                 }
             }
@@ -60,14 +61,14 @@ namespace unturned.ROCKS.GlobalBan
             if (command.Length >= 2)
             {
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), command[1], 31536000);
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
+                RocketChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
                     Steam.kick(steamPlayerID.CSteamID, command[1]);
             }
             else
             {
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid, caller.ToString(), "", 31536000);
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
+                RocketChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                 if (isOnline)
                     Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }

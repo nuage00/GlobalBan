@@ -1,8 +1,8 @@
-﻿using Rocket.RocketAPI;
+﻿using Rocket.API;
 
 namespace unturned.ROCKS.GlobalBan
 {
-    public class GlobalBanConfiguration : IRocketConfiguration
+    public class GlobalBanConfiguration : IRocketPluginConfiguration
     {
         public string DatabaseAddress;
         public string DatabaseUsername;
@@ -11,7 +11,7 @@ namespace unturned.ROCKS.GlobalBan
         public string DatabaseTableName;
         public int DatabasePort;
 
-        public IRocketConfiguration DefaultConfiguration
+        public IRocketPluginConfiguration DefaultConfiguration
         {
             get {
                 GlobalBanConfiguration config = new GlobalBanConfiguration();

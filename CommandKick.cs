@@ -1,4 +1,6 @@
-﻿using Rocket.RocketAPI;
+﻿using Rocket.Unturned;
+using Rocket.Unturned.Commands;
+using Rocket.Unturned.Player;
 using SDG;
 
 namespace unturned.ROCKS.GlobalBan
@@ -25,23 +27,23 @@ namespace unturned.ROCKS.GlobalBan
 
             if (command.Length == 0 || command.Length > 2)
             {
-                RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
             RocketPlayer playerToKick = RocketPlayer.FromName(command[0]);
             if (playerToKick == null)
             {
-                RocketChatManager.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
             if (command.Length >= 2)
             {
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
+                RocketChat.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
                 Steam.kick(playerToKick.CSteamID, command[1]);
             }
             else
             {
-                RocketChatManager.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.SteamName));
+                RocketChat.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.SteamName));
                 Steam.kick(playerToKick.CSteamID, GlobalBan.Instance.Translate("command_kick_private_default_reason"));
             }
         }
