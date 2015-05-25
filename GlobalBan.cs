@@ -13,7 +13,7 @@ namespace unturned.ROCKS.GlobalBan
         public static GlobalBan Instance;
         public DatabaseManager Database;
 
-        public static Dictionary<string, string> Players = new Dictionary<string,string>();
+        public static Dictionary<CSteamID, string> Players = new Dictionary<CSteamID, string>();
 
         protected override void Load()
         {
@@ -40,20 +40,22 @@ namespace unturned.ROCKS.GlobalBan
             }
         }
 
-        public static KeyValuePair<string, string> GetPlayer(string search) {
-            foreach (KeyValuePair<string, string> pair in Players) {
-                if (pair.Key.ToLower().Contains(search.ToLower()) || pair.Value.ToLower().Contains(search.ToLower()))
+        public static KeyValuePair<CSteamID, string> GetPlayer(string search)
+        {
+            foreach (KeyValuePair<CSteamID, string> pair in Players)
+            {
+                if (pair.Key.ToString().ToLower().Contains(search.ToLower()) || pair.Value.ToLower().Contains(search.ToLower()))
                 {
                     return pair;
                 }
             }
-            return new KeyValuePair<string, string>(null,null);
+            return new KeyValuePair<CSteamID, string>(new CSteamID(), null);
         }
 
         public void Events_OnPlayerConnected(RocketPlayer player)
         {
-            if (!Players.ContainsKey(player.CSteamID.ToString()))
-                Players.Add(player.CSteamID.ToString(), player.CharacterName);
+            if (!Players.ContainsKey(player.CSteamID))
+                Players.Add(player.CSteamID, player.CharacterName);
 
             try
             {
