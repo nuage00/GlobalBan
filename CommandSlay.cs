@@ -24,6 +24,11 @@ namespace unturned.ROCKS.GlobalBan
             get { return true; }
         }
 
+        public string Syntax
+        {
+            get { return "<player>"; }
+        }
+
         public void Execute(RocketPlayer caller, params string[] command)
         {
             SteamPlayer otherSteamPlayer = null;
