@@ -29,6 +29,10 @@ namespace unturned.ROCKS.GlobalBan
             get { return "<player> [reason] [duration]"; }
         }
 
+        public List<string> Aliases {
+            get { return new List<string>(); }
+        }
+
         public void Execute(RocketPlayer caller, params string[] command)
         {
             if (command.Length == 0 || command.Length > 3)

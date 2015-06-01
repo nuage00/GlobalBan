@@ -4,6 +4,7 @@ using Rocket.Unturned.Player;
 using SDG;
 using Steamworks;
 using System;
+using System.Collections.Generic;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -27,6 +28,11 @@ namespace unturned.ROCKS.GlobalBan
         public string Syntax
         {
             get { return "<player>"; }
+        }
+
+        public List<string> Aliases
+        {
+            get { return new List<string>(); }
         }
 
         public void Execute(RocketPlayer caller, params string[] command)
