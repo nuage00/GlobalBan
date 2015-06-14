@@ -19,7 +19,8 @@ namespace unturned.ROCKS.GlobalBan
         {
             Instance = this;
             Database = new DatabaseManager();
-            RocketServerEvents.OnPlayerConnected += Events_OnPlayerConnected;
+            RocketServerEvents.OnPlayerConnect += Events_OnPlayerConnect;
+            RocketServerEvents.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
         }
 
         public override System.Collections.Generic.Dictionary<string, string> DefaultTranslations
@@ -49,27 +50,29 @@ namespace unturned.ROCKS.GlobalBan
                     return pair;
                 }
             }
-            return new KeyValuePair<CSteamID, string>(new CSteamID(), null);
+            return new KeyValuePair<CSteamID, string>(new CSteamID(0), null);
         }
 
-        public void Events_OnPlayerConnected(RocketPlayer player)
+        void RocketServerEvents_OnPlayerConnected(RocketPlayer player)
         {
             if (!Players.ContainsKey(player.CSteamID))
                 Players.Add(player.CSteamID, player.CharacterName);
+        }
 
+        public void Events_OnPlayerConnect(CSteamID player, ref ESteamRejection? rejection)
+        {
             try
             {
-                CSteamID cSteamID = player.CSteamID;
-                string banned = Database.IsBanned(cSteamID.ToString());
+                string banned = Database.IsBanned(player.ToString());
                 if (banned != null)
                 {
                     if (banned == "") banned = Translate("default_banmessage");
-                    Steam.kick(cSteamID, banned);
+                    rejection = ESteamRejection.VAC_BANNED;
                 }
             }
             catch (Exception)
             {
-                //Nelson has to fix that....
+                
             }
         }
     }
