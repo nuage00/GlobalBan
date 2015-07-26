@@ -1,9 +1,9 @@
-﻿using Rocket.Unturned;
-using Rocket.Unturned.Commands;
-using Rocket.Unturned.Player;
-using SDG;
+﻿using Rocket.API;
 using SDG.Unturned;
 using System.Collections.Generic;
+using System;
+using Rocket.Unturned.Chat;
+using Rocket.Unturned.Player;
 
 namespace unturned.ROCKS.GlobalBan
 {
@@ -19,11 +19,6 @@ namespace unturned.ROCKS.GlobalBan
             get { return "kick"; }
         }
 
-        public bool RunFromConsole
-        {
-            get { return true; }
-        }
-
         public string Syntax
         {
             get { return "<player> [reason]"; }
@@ -34,28 +29,41 @@ namespace unturned.ROCKS.GlobalBan
             get { return new List<string>(); }
         }
 
-        public void Execute(RocketPlayer caller, params string[] command)
+        public bool AllowFromConsole
+        {
+            get { return true; }
+        }
+
+        public List<string> Permissions
+        {
+            get
+            {
+                return new List<string>() { "globalban.kick" };
+            }
+        }
+
+        public void Execute(IRocketPlayer caller, params string[] command)
         {
 
             if (command.Length == 0 || command.Length > 2)
             {
-                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
-            RocketPlayer playerToKick = RocketPlayer.FromName(command[0]);
+            UnturnedPlayer playerToKick = UnturnedPlayer.FromName(command[0]);
             if (playerToKick == null)
             {
-                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
             if (command.Length >= 2)
             {
-                RocketChat.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
+                UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
                 Steam.kick(playerToKick.CSteamID, command[1]);
             }
             else
             {
-                RocketChat.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.SteamName));
+                UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.SteamName));
                 Steam.kick(playerToKick.CSteamID, GlobalBan.Instance.Translate("command_kick_private_default_reason"));
             }
         }

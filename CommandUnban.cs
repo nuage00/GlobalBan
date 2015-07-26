@@ -1,7 +1,5 @@
-﻿using Rocket.Unturned;
-using Rocket.Unturned.Commands;
-using Rocket.Unturned.Player;
-using SDG;
+﻿using Rocket.API;
+using Rocket.Unturned.Chat;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -21,11 +19,6 @@ namespace unturned.ROCKS.GlobalBan
             get { return "unban"; }
         }
 
-        public bool RunFromConsole
-        {
-            get { return true; }
-        }
-
         public string Syntax
         {
             get { return "<player>"; }
@@ -36,23 +29,36 @@ namespace unturned.ROCKS.GlobalBan
             get { return new List<string>(); }
         }
 
-        public void Execute(RocketPlayer caller, params string[] command)
+        public bool AllowFromConsole
+        {
+            get { return true; }
+        }
+
+        public List<string> Permissions
+        {
+            get
+            {
+                return new List<string>() { "globalban.unban" };
+            }
+        }
+
+        public void Execute(IRocketPlayer caller, params string[] command)
         {
             if (command.Length != 1)
             {
-                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
 
             unturned.ROCKS.GlobalBan.DatabaseManager.UnbanResult name = GlobalBan.Instance.Database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && String.IsNullOrEmpty(name.Name))
             {
-                RocketChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;
             }
             else
             {
-                RocketChat.Say("The player " + name + " was unbanned");
+                UnturnedChat.Say("The player " + name + " was unbanned");
             }
         }
 

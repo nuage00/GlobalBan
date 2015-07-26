@@ -1,6 +1,9 @@
-﻿using Rocket.Unturned.Events;
+﻿using Rocket.API.Collections;
+using Rocket.Core.Plugins;
+using Rocket.Unturned;
+using Rocket.Unturned.Events;
+using Rocket.Unturned.Permissions;
 using Rocket.Unturned.Player;
-using Rocket.Unturned.Plugins;
 using SDG.Unturned;
 using Steamworks;
 using System;
@@ -19,15 +22,15 @@ namespace unturned.ROCKS.GlobalBan
         {
             Instance = this;
             Database = new DatabaseManager();
-            RocketServerEvents.OnPlayerConnect += Events_OnPlayerConnect;
-            RocketServerEvents.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
+            UnturnedPermissions.OnJoinRequested += Events_OnJoinRequested;
+            U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
         }
 
-        public override System.Collections.Generic.Dictionary<string, string> DefaultTranslations
+        public override TranslationList DefaultTranslations
         {
             get
             {
-                return new System.Collections.Generic.Dictionary<string, string>() {
+                return new TranslationList() {
                     {"default_banmessage","you are banned, contact the staff if you feel this is a mistake."},
                     {"command_generic_invalid_parameter","Invalid parameter"},
                     {"command_generic_player_not_found","Player not found"},
@@ -53,13 +56,13 @@ namespace unturned.ROCKS.GlobalBan
             return new KeyValuePair<CSteamID, string>(new CSteamID(0), null);
         }
 
-        void RocketServerEvents_OnPlayerConnected(RocketPlayer player)
+        void RocketServerEvents_OnPlayerConnected(UnturnedPlayer player)
         {
             if (!Players.ContainsKey(player.CSteamID))
                 Players.Add(player.CSteamID, player.CharacterName);
         }
 
-        public void Events_OnPlayerConnect(CSteamID player, ref ESteamRejection? rejection)
+        public void Events_OnJoinRequested(CSteamID player, ref ESteamRejection? rejection)
         {
             try
             {

@@ -1,6 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
-using Rocket.Unturned.Logging;
-using SDG;
+using Rocket.Core.Logging;
 using System;
 
 namespace unturned.ROCKS.GlobalBan
@@ -18,8 +17,8 @@ namespace unturned.ROCKS.GlobalBan
             MySqlConnection connection = null;
             try
             {
-                if (GlobalBan.Instance.Configuration.DatabasePort == 0) GlobalBan.Instance.Configuration.DatabasePort = 3306;
-                connection = new MySqlConnection(String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GlobalBan.Instance.Configuration.DatabaseAddress, GlobalBan.Instance.Configuration.DatabaseName, GlobalBan.Instance.Configuration.DatabaseUsername, GlobalBan.Instance.Configuration.DatabasePassword, GlobalBan.Instance.Configuration.DatabasePort));
+                if (GlobalBan.Instance.Configuration.Instance.DatabasePort == 0) GlobalBan.Instance.Configuration.Instance.DatabasePort = 3306;
+                connection = new MySqlConnection(String.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GlobalBan.Instance.Configuration.Instance.DatabaseAddress, GlobalBan.Instance.Configuration.Instance.DatabaseName, GlobalBan.Instance.Configuration.Instance.DatabaseUsername, GlobalBan.Instance.Configuration.Instance.DatabasePassword, GlobalBan.Instance.Configuration.Instance.DatabasePort));
             }
             catch (Exception ex)
             {
@@ -35,7 +34,7 @@ namespace unturned.ROCKS.GlobalBan
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "select `banMessage` from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
+                command.CommandText = "select `banMessage` from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
                 connection.Open();
                 object result = command.ExecuteScalar();
                 if (result != null) output = result.ToString();
@@ -54,13 +53,13 @@ namespace unturned.ROCKS.GlobalBan
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "show tables like '" + GlobalBan.Instance.Configuration.DatabaseTableName + "'";
+                command.CommandText = "show tables like '" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "'";
                 connection.Open();
                 object test = command.ExecuteScalar();
 
                 if (test == null)
                 {
-                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
+                    command.CommandText = "CREATE TABLE `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
                     command.ExecuteNonQuery();
                 }
                 connection.Close();
@@ -91,7 +90,7 @@ namespace unturned.ROCKS.GlobalBan
                 {
                     command.Parameters.AddWithValue("@banDuration", duration);
                 }
-                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
+                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -115,7 +114,7 @@ namespace unturned.ROCKS.GlobalBan
 
                 MySqlCommand command = connection.CreateCommand();
                 command.Parameters.AddWithValue("@player", "%" + player + "%");
-                command.CommandText = "select steamId,charactername from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` like @player or `charactername` like @player limit 1;";
+                command.CommandText = "select steamId,charactername from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` like @player or `charactername` like @player limit 1;";
                 connection.Open();
                 MySqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
@@ -125,7 +124,7 @@ namespace unturned.ROCKS.GlobalBan
                     connection.Close();
                     command = connection.CreateCommand();
                     command.Parameters.AddWithValue("@steamId", steamId);
-                    command.CommandText = "delete from `" + GlobalBan.Instance.Configuration.DatabaseTableName + "` where `steamId` = @steamId;";
+                    command.CommandText = "delete from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = @steamId;";
                     connection.Open();
                     command.ExecuteNonQuery();
                     connection.Close();
