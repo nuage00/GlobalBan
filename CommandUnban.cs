@@ -5,7 +5,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 
-namespace unturned.ROCKS.GlobalBan
+namespace fr34kyn01535.GlobalBan
 {
     public class CommandUnban : IRocketCommand
     {
@@ -50,7 +50,7 @@ namespace unturned.ROCKS.GlobalBan
                 return;
             }
 
-            unturned.ROCKS.GlobalBan.DatabaseManager.UnbanResult name = GlobalBan.Instance.Database.UnbanPlayer(command[0]);
+            fr34kyn01535.GlobalBan.DatabaseManager.UnbanResult name = GlobalBan.Instance.Database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && String.IsNullOrEmpty(name.Name))
             {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));

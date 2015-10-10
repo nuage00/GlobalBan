@@ -9,7 +9,7 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 
-namespace unturned.ROCKS.GlobalBan
+namespace fr34kyn01535.GlobalBan
 {
     public class GlobalBan : RocketPlugin<GlobalBanConfiguration>
     {

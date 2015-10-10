@@ -8,7 +8,7 @@ using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
 
-namespace unturned.ROCKS.GlobalBan
+namespace fr34kyn01535.GlobalBan
 {
     public class CommandSlay : IRocketCommand
     {

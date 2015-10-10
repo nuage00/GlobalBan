@@ -2,7 +2,7 @@
 using Rocket.Core.Logging;
 using System;
 
-namespace unturned.ROCKS.GlobalBan
+namespace fr34kyn01535.GlobalBan
 {
     public class DatabaseManager
     {

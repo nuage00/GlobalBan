@@ -1,7 +1,7 @@
 ﻿using System;
 using Rocket.API;
 
-namespace unturned.ROCKS.GlobalBan
+namespace fr34kyn01535.GlobalBan
 {
     public class GlobalBanConfiguration : IRocketPluginConfiguration
     {
