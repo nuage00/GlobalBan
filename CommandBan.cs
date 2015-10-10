@@ -92,7 +92,7 @@ namespace unturned.ROCKS.GlobalBan
                         GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], duration);
                         UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                         if (isOnline)
-                            Steam.kick(steamid, command[1]);
+                            Provider.kick(steamid, command[1]);
                     }
                     else
                     {
@@ -106,14 +106,14 @@ namespace unturned.ROCKS.GlobalBan
                     GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], 0);
                     UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                     if (isOnline)
-                        Steam.kick(steamid, command[1]);
+                        Provider.kick(steamid, command[1]);
                 }
                 else
                 {
                     GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, "", 0);
                     UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                     if (isOnline)
-                        Steam.kick(steamid, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                        Provider.kick(steamid, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
                 }
 
             }

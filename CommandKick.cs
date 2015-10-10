@@ -59,12 +59,12 @@ namespace unturned.ROCKS.GlobalBan
             if (command.Length >= 2)
             {
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.SteamName, command[1]));
-                Steam.kick(playerToKick.CSteamID, command[1]);
+                Provider.kick(playerToKick.CSteamID, command[1]);
             }
             else
             {
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.SteamName));
-                Steam.kick(playerToKick.CSteamID, GlobalBan.Instance.Translate("command_kick_private_default_reason"));
+                Provider.kick(playerToKick.CSteamID, GlobalBan.Instance.Translate("command_kick_private_default_reason"));
             }
         }
     }

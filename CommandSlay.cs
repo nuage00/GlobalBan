@@ -85,14 +85,14 @@ namespace unturned.ROCKS.GlobalBan
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), command[1], 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
-                    Steam.kick(steamPlayerID.CSteamID, command[1]);
+                    Provider.kick(steamPlayerID.CSteamID, command[1]);
             }
             else
             {
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), "", 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                 if (isOnline)
-                    Steam.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                    Provider.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }
         }
     }
