@@ -26,6 +26,12 @@ namespace fr34kyn01535.GlobalBan
             U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
         }
 
+        protected override void Unload()
+        {
+            UnturnedPermissions.OnJoinRequested -= Events_OnJoinRequested;
+            U.Events.OnPlayerConnected -= RocketServerEvents_OnPlayerConnected;
+        }
+
         public override TranslationList DefaultTranslations
         {
             get
