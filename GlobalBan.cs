@@ -76,7 +76,7 @@ namespace fr34kyn01535.GlobalBan
                 if (banned != null)
                 {
                     if (banned == "") banned = Translate("default_banmessage");
-                    rejection = ESteamRejection.VAC_BANNED;
+                    rejection = ESteamRejection.AUTH_PUB_BAN;
                 }
             }
             catch (Exception)
