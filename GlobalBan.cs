@@ -1,4 +1,7 @@
-﻿using Rocket.API.Collections;
+﻿using Rocket.API;
+using Rocket.API.Collections;
+using Rocket.Core.Commands;
+using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned;
 using Rocket.Unturned.Events;

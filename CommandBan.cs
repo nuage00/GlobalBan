@@ -30,9 +30,9 @@ namespace fr34kyn01535.GlobalBan
             get { return new List<string>(); }
         }
 
-        public bool AllowFromConsole
+        public AllowedCaller AllowedCaller
         {
-            get { return true; }
+            get { return AllowedCaller.Both; }
         }
 
         public List<string> Permissions
