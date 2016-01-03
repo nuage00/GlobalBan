@@ -2,10 +2,12 @@
 using Rocket.Core.Logging;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
+using Rocket.Unturned.Commands;
 using SDG;
 using SDG.Unturned;
 using Steamworks;
 using System.Collections.Generic;
+using Rocket.Core.Steam;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -57,8 +59,10 @@ namespace fr34kyn01535.GlobalBan
 
                 CSteamID steamid;
                 string charactername = null;
+                
 
                 UnturnedPlayer otherPlayer = UnturnedPlayer.FromName(command[0]);
+                ulong? otherPlayerID = command.GetCSteamIDParameter(0);
                 if (otherPlayer == null || otherPlayer.CSteamID.ToString() == "0" || caller != null && otherPlayer.CSteamID.ToString() == caller.Id)
                 {
                     KeyValuePair<CSteamID, string> player = GlobalBan.GetPlayer(command[0]);
@@ -69,8 +73,17 @@ namespace fr34kyn01535.GlobalBan
                     }
                     else
                     {
-                        UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                        return;
+                        if (otherPlayerID != null)
+                        {
+                            steamid = new CSteamID(otherPlayerID.Value);
+                            Profile playerProfile = new Profile(otherPlayerID.Value);
+                            charactername = playerProfile.SteamID;
+                        }
+                        else
+                        {
+                            UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                            return;
+                        }
                     }
                 }
                 else
