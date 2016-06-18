@@ -19,7 +19,7 @@
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>..\..\..\Desktop\Unturned\Servers\cobra1\Rocket\Plugins\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -106,8 +106,6 @@
     <Content Include="Libraries\System.Management.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Assembly-CSharp-firstpass.dll" />
-    <Content Include="lib\Assembly-CSharp.dll" />
     <Content Include="Libraries\I18N.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -123,6 +121,8 @@
     <Content Include="Libraries\System.Transactions.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="lib\Assembly-CSharp-firstpass.dll" />
+    <Content Include="lib\Assembly-CSharp.dll" />
     <Content Include="lib\Rocket.API.dll" />
     <Content Include="lib\Rocket.Core.dll" />
     <Content Include="lib\Rocket.Unturned.dll" />
