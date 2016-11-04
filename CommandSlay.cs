@@ -76,8 +76,8 @@ namespace fr34kyn01535.GlobalBan
             else
             {
                 isOnline = true;
-                steamid = otherSteamPlayer.SteamPlayerID.CSteamID;
-                charactername = otherSteamPlayer.SteamPlayerID.CharacterName;
+                steamid = otherSteamPlayer.playerID.steamID;
+                charactername = otherSteamPlayer.playerID.characterName;
             }
 
             if (command.Length >= 2)
@@ -85,14 +85,14 @@ namespace fr34kyn01535.GlobalBan
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), command[1], 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
-                    Provider.kick(steamPlayerID.CSteamID, command[1]);
+                    Provider.kick(steamPlayerID.steamID, command[1]);
             }
             else
             {
                 GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), "", 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                 if (isOnline)
-                    Provider.kick(steamPlayerID.CSteamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                    Provider.kick(steamPlayerID.steamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }
         }
     }
