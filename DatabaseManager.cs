@@ -1,6 +1,7 @@
 ﻿using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
 using System;
+using System.Text.RegularExpressions;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -74,7 +75,7 @@ namespace fr34kyn01535.GlobalBan
         {
             try
             {
-
+                characterName = Regex.Replace(characterName, @"\p{Cs}", "");
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
                 if (banMessage == null) banMessage = "";
