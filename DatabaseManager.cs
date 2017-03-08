@@ -28,24 +28,53 @@ namespace fr34kyn01535.GlobalBan
             return connection;
         }
 
-        public string IsBanned(string steamId)
+        public bool IsBanned(string steamId)
         {
-            string output = null;
             try
             {
                 MySqlConnection connection = createConnection();
                 MySqlCommand command = connection.CreateCommand();
-                command.CommandText = "select `banMessage` from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
+                command.CommandText = "select 1 from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
                 connection.Open();
                 object result = command.ExecuteScalar();
-                if (result != null) output = result.ToString();
+                if (result != null) return true;
                 connection.Close();
             }
             catch (Exception ex)
             {
                 Logger.LogException(ex);
             }
-            return output;
+            return false;
+        }
+
+        public class Ban{
+            public int Duration;
+            public DateTime Time;
+            public string Admin;
+        }
+
+
+        public Ban GetBan(string steamId)
+        {
+            try
+            {
+                MySqlConnection connection = createConnection();
+                MySqlCommand command = connection.CreateCommand();
+                command.CommandText = "select  `banDuration`,`banTime`,`admin` from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
+                connection.Open();
+                MySqlDataReader result = command.ExecuteReader(System.Data.CommandBehavior.SingleRow);
+                if (result != null) return new Ban() {
+                    Duration = (int)result["banDuration"],
+                    Time = (DateTime)result["banDUration"],
+                    Admin = (string)result["admin"]
+                };
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+            return null;
         }
 
         public void CheckSchema()

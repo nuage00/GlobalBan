@@ -11,6 +11,7 @@ namespace fr34kyn01535.GlobalBan
         public string DatabaseName;
         public string DatabaseTableName;
         public int DatabasePort;
+        public bool KickInsteadReject = false;
 
         public void LoadDefaults()
         {
@@ -20,6 +21,7 @@ namespace fr34kyn01535.GlobalBan
             DatabaseName = "unturned";
             DatabaseTableName = "banlist";
             DatabasePort = 3306;
+            KickInsteadReject = false;
         }
     }
 }

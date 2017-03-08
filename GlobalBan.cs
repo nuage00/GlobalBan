@@ -10,7 +10,9 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -40,7 +42,7 @@ namespace fr34kyn01535.GlobalBan
             get
             {
                 return new TranslationList() {
-                    {"default_banmessage","you are banned, contact the staff if you feel this is a mistake."},
+                    {"default_banmessage","you were banned by {0} on {1} for {2} seconds, contact the staff if you feel this is a mistake."},
                     {"command_generic_invalid_parameter","Invalid parameter"},
                     {"command_generic_player_not_found","Player not found"},
                     {"command_ban_public_reason", "The player {0} was banned for: {1}"},
@@ -69,16 +71,26 @@ namespace fr34kyn01535.GlobalBan
         {
             if (!Players.ContainsKey(player.CSteamID))
                 Players.Add(player.CSteamID, player.CharacterName);
+            
+            if (Configuration.Instance.KickInsteadReject)
+            {
+                DatabaseManager.Ban ban = Database.GetBan(player.CSteamID.ToString());
+                if(ban != null)
+                    StartCoroutine(KickPlayer(player,ban));
+            }
+        }
+        IEnumerator KickPlayer(UnturnedPlayer player,DatabaseManager.Ban ban)
+        {
+            yield return new WaitForEndOfFrame();
+            player.Kick(Translate("default_banmessage",ban.Admin,ban.Time.ToString(),ban.Duration));
         }
 
         public void Events_OnJoinRequested(CSteamID player, ref ESteamRejection? rejection)
         {
             try
             {
-                string banned = Database.IsBanned(player.ToString());
-                if (banned != null)
+                if (!Configuration.Instance.KickInsteadReject && Database.IsBanned(player.ToString()))
                 {
-                    if (banned == "") banned = Translate("default_banmessage");
                     rejection = ESteamRejection.AUTH_PUB_BAN;
                 }
             }
