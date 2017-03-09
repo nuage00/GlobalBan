@@ -63,7 +63,7 @@ namespace fr34kyn01535.GlobalBan
                 command.CommandText = "select  `banDuration`,`banTime`,`admin` from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "` where `steamId` = '" + steamId + "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
                 connection.Open();
                 MySqlDataReader result = command.ExecuteReader(System.Data.CommandBehavior.SingleRow);
-                if (result != null) return new Ban() {
+                if (result != null && result.Read() && result.HasRows) return new Ban() {
                     Duration = (int)result["banDuration"],
                     Time = (DateTime)result["banDUration"],
                     Admin = (string)result["admin"]
