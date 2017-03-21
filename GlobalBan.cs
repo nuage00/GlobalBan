@@ -74,7 +74,7 @@ namespace fr34kyn01535.GlobalBan
             
             if (Configuration.Instance.KickInsteadReject)
             {
-                DatabaseManager.Ban ban = Database.GetBan(player.CSteamID.ToString());
+                DatabaseManager.Ban ban = Database.GetBan(player.Id);
                 if(ban != null)
                     StartCoroutine(KickPlayer(player,ban));
             }
