@@ -75,14 +75,14 @@ namespace fr34kyn01535.GlobalBan
             if (Configuration.Instance.KickInsteadReject)
             {
                 DatabaseManager.Ban ban = Database.GetBan(player.Id);
-                if(ban != null)
+                if(ban != null && (ban.Duration == -1 || ban.Time.AddSeconds(ban.Duration) > DateTime.Now))
                     StartCoroutine(KickPlayer(player,ban));
             }
         }
         IEnumerator KickPlayer(UnturnedPlayer player,DatabaseManager.Ban ban)
         {
-            yield return new WaitForEndOfFrame();
-            player.Kick(Translate("default_banmessage",ban.Admin,ban.Time.ToString(),ban.Duration));
+            yield return new WaitForSeconds(Instance.Configuration.Instance.KickInterval);
+            player.Kick(Translate("default_banmessage",ban.Admin,ban.Time.ToString(),ban.Duration == -1 ? "" : ban.Duration.ToString()));
         }
 
         public void Events_OnJoinRequested(CSteamID player, ref ESteamRejection? rejection)

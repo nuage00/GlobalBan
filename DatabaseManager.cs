@@ -64,7 +64,7 @@ namespace fr34kyn01535.GlobalBan
                 connection.Open();
                 MySqlDataReader result = command.ExecuteReader(System.Data.CommandBehavior.SingleRow);
                 if (result != null && result.Read() && result.HasRows) return new Ban() {
-                    Duration = (int)result["banDuration"],
+                    Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
                     Time = (DateTime)result["banTime"],
                     Admin = (string)result["admin"]
                 };
