@@ -82,14 +82,14 @@ namespace fr34kyn01535.GlobalBan
 
             if (command.Length >= 2)
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), command[1], 31536000);
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, command[1], 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
                     Provider.kick(steamPlayerID.steamID, command[1]);
             }
             else
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.ToString(), "", 31536000);
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, "", 31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                 if (isOnline)
                     Provider.kick(steamPlayerID.steamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));

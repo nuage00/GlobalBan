@@ -66,7 +66,7 @@ namespace fr34kyn01535.GlobalBan
                 if (result != null && result.Read() && result.HasRows) return new Ban() {
                     Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
                     Time = (DateTime)result["banTime"],
-                    Admin = (string)result["admin"]
+                    Admin = (result["admin"] == DBNull.Value || result["admin"].ToString() == "Rocket.API.ConsolePlayer") ? "Console" : (string)result["admin"]
                 };
                 connection.Close();
             }
