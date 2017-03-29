@@ -58,7 +58,7 @@ namespace fr34kyn01535.GlobalBan
             }
             else
             {
-                UnturnedChat.Say("The player " + name + " was unbanned");
+                UnturnedChat.Say("The player " + name.Name + " was unbanned");
             }
         }
 
