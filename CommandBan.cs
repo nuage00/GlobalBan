@@ -13,37 +13,17 @@ namespace fr34kyn01535.GlobalBan
 {
     public class CommandBan : IRocketCommand
     {
-        public string Help
-        {
-            get { return  "Banns a player"; }
-        }
+        public string Help => "Banns a player";
 
-        public string Name
-        {
-            get { return "ban"; }
-        }
+        public string Name => "ban";
 
-        public string Syntax
-        {
-            get { return "<player> [reason] [duration]"; }
-        }
+        public string Syntax => "<player> [reason] [duration]";
 
-        public List<string> Aliases {
-            get { return new List<string>(); }
-        }
+        public List<string> Aliases => new List<string>();
 
-        public AllowedCaller AllowedCaller
-        {
-            get { return AllowedCaller.Both; }
-        }
+        public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions
-        {
-            get
-            {
-                return new List<string>() { "globalban.ban" };
-            }
-        }
+        public List<string> Permissions => new List<string>() {"globalban.ban"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
@@ -55,17 +35,18 @@ namespace fr34kyn01535.GlobalBan
                     return;
                 }
 
-                bool isOnline = false;
+                var isOnline = false;
 
                 CSteamID steamid;
                 string charactername = null;
-                
 
-                UnturnedPlayer otherPlayer = UnturnedPlayer.FromName(command[0]);
-                ulong? otherPlayerID = command.GetCSteamIDParameter(0);
-                if (otherPlayer == null || otherPlayer.CSteamID.ToString() == "0" || caller != null && otherPlayer.CSteamID.ToString() == caller.Id)
+
+                var otherPlayer = UnturnedPlayer.FromName(command[0]);
+                var otherPlayerID = command.GetCSteamIDParameter(0);
+                if (otherPlayer == null || otherPlayer.CSteamID.ToString() == "0" ||
+                    caller != null && otherPlayer.CSteamID.ToString() == caller.Id)
                 {
-                    KeyValuePair<CSteamID, string> player = GlobalBan.GetPlayer(command[0]);
+                    var player = GlobalBan.GetPlayer(command[0]);
                     if (player.Key.ToString() != "0")
                     {
                         steamid = player.Key;
@@ -76,7 +57,7 @@ namespace fr34kyn01535.GlobalBan
                         if (otherPlayerID != null)
                         {
                             steamid = new CSteamID(otherPlayerID.Value);
-                            Profile playerProfile = new Profile(otherPlayerID.Value);
+                            var playerProfile = new Profile(otherPlayerID.Value);
                             charactername = playerProfile.SteamID;
                         }
                         else
@@ -93,17 +74,18 @@ namespace fr34kyn01535.GlobalBan
                     charactername = otherPlayer.CharacterName;
                 }
 
-                string adminName = "Console";
+                var adminName = "Console";
                 if (caller != null) adminName = caller.ToString();
 
                 if (command.Length == 3)
                 {
-                    int duration = 0;
+                    var duration = 0;
                     if (int.TryParse(command[2], out duration))
                     {
-
-                        GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], duration);
-                        UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
+                        GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1],
+                            duration);
+                        UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername,
+                            command[1]));
                         if (isOnline)
                             Provider.kick(steamid, command[1]);
                     }
@@ -115,9 +97,9 @@ namespace fr34kyn01535.GlobalBan
                 }
                 else if (command.Length == 2)
                 {
-
                     GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], 0);
-                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
+                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername,
+                        command[1]));
                     if (isOnline)
                         Provider.kick(steamid, command[1]);
                 }
@@ -128,7 +110,6 @@ namespace fr34kyn01535.GlobalBan
                     if (isOnline)
                         Provider.kick(steamid, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
                 }
-
             }
             catch (System.Exception ex)
             {

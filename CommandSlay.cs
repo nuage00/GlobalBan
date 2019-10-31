@@ -12,38 +12,17 @@ namespace fr34kyn01535.GlobalBan
 {
     public class CommandSlay : IRocketCommand
     {
-        public string Help
-        {
-            get { return  "Banns a player for a year"; }
-        }
+        public string Help => "Banns a player for a year";
 
-        public string Name
-        {
-            get { return "slay"; }
-        }
+        public string Name => "slay";
 
-        public string Syntax
-        {
-            get { return "<player>"; }
-        }
+        public string Syntax => "<player>";
 
-        public List<string> Aliases
-        {
-            get { return new List<string>(); }
-        }
+        public List<string> Aliases => new List<string>();
 
-        public AllowedCaller AllowedCaller
-        {
-            get { return AllowedCaller.Both; }
-        }
+        public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions
-        {
-            get
-            {
-                return new List<string>() { "globalban.slay" };
-            }
-        }
+        public List<string> Permissions => new List<string>() {"globalban.slay"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
@@ -56,12 +35,12 @@ namespace fr34kyn01535.GlobalBan
                 return;
             }
 
-            bool isOnline = false;
+            var isOnline = false;
             CSteamID steamid;
             string charactername = null;
             if (!PlayerTool.tryGetSteamPlayer(command[0], out otherSteamPlayer))
             {
-                KeyValuePair<CSteamID, string> player = GlobalBan.GetPlayer(command[0]);
+                var player = GlobalBan.GetPlayer(command[0]);
                 if (player.Key != null)
                 {
                     steamid = player.Key;
@@ -82,17 +61,20 @@ namespace fr34kyn01535.GlobalBan
 
             if (command.Length >= 2)
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, command[1], 31536000);
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, command[1],
+                    31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
                 if (isOnline)
                     Provider.kick(steamPlayerID.steamID, command[1]);
             }
             else
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, "", 31536000);
+                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, "",
+                    31536000);
                 UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
                 if (isOnline)
-                    Provider.kick(steamPlayerID.steamID, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                    Provider.kick(steamPlayerID.steamID,
+                        GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }
         }
     }
