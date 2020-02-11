@@ -1,14 +1,10 @@
-﻿using Rocket.API;
-using Rocket.Unturned;
+﻿using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Commands;
-using Rocket.Unturned.Player;
-using SDG;
 using SDG.Unturned;
 using Steamworks;
-using System.Collections.Generic;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandSlay : IRocketCommand
     {
@@ -22,12 +18,12 @@ namespace fr34kyn01535.GlobalBan
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string>() {"globalban.slay"};
+        public List<string> Permissions => new List<string> {"globalban.slay"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
             SteamPlayer otherSteamPlayer = null;
-            SteamPlayerID steamPlayerID = null;
+            SteamPlayerID steamPlayerId = null;
 
             if (command.Length == 0 || command.Length > 2)
             {
@@ -36,15 +32,15 @@ namespace fr34kyn01535.GlobalBan
             }
 
             var isOnline = false;
-            CSteamID steamid;
-            string charactername = null;
+            CSteamID steamId;
+            string characterName = null;
             if (!PlayerTool.tryGetSteamPlayer(command[0], out otherSteamPlayer))
             {
                 var player = GlobalBan.GetPlayer(command[0]);
                 if (player.Key != null)
                 {
-                    steamid = player.Key;
-                    charactername = player.Value;
+                    steamId = player.Key;
+                    characterName = player.Value;
                 }
                 else
                 {
@@ -55,25 +51,25 @@ namespace fr34kyn01535.GlobalBan
             else
             {
                 isOnline = true;
-                steamid = otherSteamPlayer.playerID.steamID;
-                charactername = otherSteamPlayer.playerID.characterName;
+                steamId = otherSteamPlayer.playerID.steamID;
+                characterName = otherSteamPlayer.playerID.characterName;
             }
 
             if (command.Length >= 2)
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, command[1],
+                GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), caller.DisplayName, command[1],
                     31536000);
-                UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername, command[1]));
+                UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, command[1]));
                 if (isOnline)
-                    Provider.kick(steamPlayerID.steamID, command[1]);
+                    Provider.kick(steamPlayerId.steamID, command[1]);
             }
             else
             {
-                GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), caller.DisplayName, "",
+                GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), caller.DisplayName, "",
                     31536000);
-                UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
+                UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", characterName));
                 if (isOnline)
-                    Provider.kick(steamPlayerID.steamID,
+                    Provider.kick(steamPlayerId.steamID,
                         GlobalBan.Instance.Translate("command_ban_private_default_reason"));
             }
         }

@@ -1,19 +1,19 @@
-﻿using Rocket.API;
+﻿using System;
+using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Core.Logging;
+using Rocket.Core.Steam;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
 using Rocket.Unturned.Commands;
-using SDG;
+using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using System.Collections.Generic;
-using Rocket.Core.Steam;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandBan : IRocketCommand
     {
-        public string Help => "Banns a player";
+        public string Help => "Bans a player";
 
         public string Name => "ban";
 
@@ -23,7 +23,7 @@ namespace fr34kyn01535.GlobalBan
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string>() {"globalban.ban"};
+        public List<string> Permissions => new List<string> {"globalban.ban"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
@@ -37,28 +37,28 @@ namespace fr34kyn01535.GlobalBan
 
                 var isOnline = false;
 
-                CSteamID steamid;
-                string charactername = null;
+                CSteamID steamId;
+                string characterName = null;
 
 
                 var otherPlayer = UnturnedPlayer.FromName(command[0]);
-                var otherPlayerID = command.GetCSteamIDParameter(0);
+                var otherPlayerId = command.GetCSteamIDParameter(0);
                 if (otherPlayer == null || otherPlayer.CSteamID.ToString() == "0" ||
                     caller != null && otherPlayer.CSteamID.ToString() == caller.Id)
                 {
                     var player = GlobalBan.GetPlayer(command[0]);
                     if (player.Key.ToString() != "0")
                     {
-                        steamid = player.Key;
-                        charactername = player.Value;
+                        steamId = player.Key;
+                        characterName = player.Value;
                     }
                     else
                     {
-                        if (otherPlayerID != null)
+                        if (otherPlayerId != null)
                         {
-                            steamid = new CSteamID(otherPlayerID.Value);
-                            var playerProfile = new Profile(otherPlayerID.Value);
-                            charactername = playerProfile.SteamID;
+                            steamId = new CSteamID(otherPlayerId.Value);
+                            var playerProfile = new Profile(otherPlayerId.Value);
+                            characterName = playerProfile.SteamID;
                         }
                         else
                         {
@@ -70,8 +70,8 @@ namespace fr34kyn01535.GlobalBan
                 else
                 {
                     isOnline = true;
-                    steamid = otherPlayer.CSteamID;
-                    charactername = otherPlayer.CharacterName;
+                    steamId = otherPlayer.CSteamID;
+                    characterName = otherPlayer.CharacterName;
                 }
 
                 var adminName = "Console";
@@ -80,38 +80,38 @@ namespace fr34kyn01535.GlobalBan
                 if (command.Length == 3)
                 {
                     var duration = 0;
-                    if (int.TryParse(command[2], out duration))
+                    if (GlobalBan.TryConvertTimeToSeconds(command[2], out duration))
                     {
-                        GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1],
+                        GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), adminName, command[1],
                             duration);
-                        UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername,
+                        UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName,
                             command[1]));
                         if (isOnline)
-                            Provider.kick(steamid, command[1]);
+                            Provider.ban(steamId, command[1], (uint) duration);
                     }
                     else
                     {
                         UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
-                        return;
                     }
                 }
                 else if (command.Length == 2)
                 {
-                    GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, command[1], 0);
-                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", charactername,
+                    GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), adminName, command[1], 0);
+                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName,
                         command[1]));
                     if (isOnline)
-                        Provider.kick(steamid, command[1]);
+                        Provider.ban(steamId, command[1], uint.MaxValue);
                 }
                 else
                 {
-                    GlobalBan.Instance.Database.BanPlayer(charactername, steamid.ToString(), adminName, "", 0);
-                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", charactername));
+                    GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), adminName, "", 0);
+                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", characterName));
                     if (isOnline)
-                        Provider.kick(steamid, GlobalBan.Instance.Translate("command_ban_private_default_reason"));
+                        Provider.ban(steamId, GlobalBan.Instance.Translate("command_ban_private_default_reason"),
+                            uint.MaxValue);
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Logger.LogException(ex);
             }

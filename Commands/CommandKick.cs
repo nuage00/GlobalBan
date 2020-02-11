@@ -1,11 +1,10 @@
-﻿using Rocket.API;
-using SDG.Unturned;
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
+using SDG.Unturned;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandKick : IRocketCommand
     {
@@ -19,7 +18,7 @@ namespace fr34kyn01535.GlobalBan
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string>() {"globalban.kick"};
+        public List<string> Permissions => new List<string> {"globalban.kick"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {

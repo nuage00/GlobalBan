@@ -1,11 +1,10 @@
-﻿using Rocket.API;
+﻿using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Unturned.Chat;
 using SDG.Unturned;
 using Steamworks;
-using System;
-using System.Collections.Generic;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandUnban : IRocketCommand
     {
@@ -19,7 +18,7 @@ namespace fr34kyn01535.GlobalBan
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string>() {"globalban.unban"};
+        public List<string> Permissions => new List<string> {"globalban.unban"};
 
         public void Execute(IRocketPlayer caller, params string[] command)
         {
@@ -29,16 +28,11 @@ namespace fr34kyn01535.GlobalBan
                 return;
             }
 
-            var name = GlobalBan.Instance.Database.UnbanPlayer(command[0]);
+            var name = GlobalBan.Instance.database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && string.IsNullOrEmpty(name.Name))
-            {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                return;
-            }
             else
-            {
                 UnturnedChat.Say("The player " + name.Name + " was unbanned");
-            }
         }
     }
 }
