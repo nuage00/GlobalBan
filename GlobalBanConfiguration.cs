@@ -1,5 +1,4 @@
-﻿using System;
-using Rocket.API;
+﻿using Rocket.API;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -10,9 +9,9 @@ namespace fr34kyn01535.GlobalBan
         public string DatabasePassword;
         public string DatabaseName;
         public string DatabaseTableName;
-        public int KickInterval = 10;
         public int DatabasePort;
-        public bool KickInsteadReject = false;
+        public int KickInterval;
+        public bool KickInsteadReject;
 
         public void LoadDefaults()
         {
@@ -20,9 +19,9 @@ namespace fr34kyn01535.GlobalBan
             DatabaseUsername = "unturned";
             DatabasePassword = "password";
             DatabaseName = "unturned";
-            KickInterval = 10;
             DatabaseTableName = "banlist";
             DatabasePort = 3306;
+            KickInterval = 10;
             KickInsteadReject = false;
         }
     }
