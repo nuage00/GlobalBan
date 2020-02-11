@@ -1,7 +1,9 @@
-﻿using MySql.Data.MySqlClient;
-using Rocket.Core.Logging;
-using System;
+﻿using System;
+using System.Data;
 using System.Text.RegularExpressions;
+using I18N.West;
+using MySql.Data.MySqlClient;
+using Rocket.Core.Logging;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -9,23 +11,19 @@ namespace fr34kyn01535.GlobalBan
     {
         public DatabaseManager()
         {
-            new I18N.West.CP1250();
+            new CP1250();
             CheckSchema();
         }
 
-        private MySqlConnection createConnection()
+        private MySqlConnection CreateConnection()
         {
             MySqlConnection connection = null;
             try
             {
                 if (GlobalBan.Instance.Configuration.Instance.DatabasePort == 0)
                     GlobalBan.Instance.Configuration.Instance.DatabasePort = 3306;
-                connection = new MySqlConnection(string.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};",
-                    GlobalBan.Instance.Configuration.Instance.DatabaseAddress,
-                    GlobalBan.Instance.Configuration.Instance.DatabaseName,
-                    GlobalBan.Instance.Configuration.Instance.DatabaseUsername,
-                    GlobalBan.Instance.Configuration.Instance.DatabasePassword,
-                    GlobalBan.Instance.Configuration.Instance.DatabasePort));
+                connection = new MySqlConnection(
+                    $"SERVER={GlobalBan.Instance.Configuration.Instance.DatabaseAddress};DATABASE={GlobalBan.Instance.Configuration.Instance.DatabaseName};UID={GlobalBan.Instance.Configuration.Instance.DatabaseUsername};PASSWORD={GlobalBan.Instance.Configuration.Instance.DatabasePassword};PORT={GlobalBan.Instance.Configuration.Instance.DatabasePort};");
             }
             catch (Exception ex)
             {
@@ -39,7 +37,7 @@ namespace fr34kyn01535.GlobalBan
         {
             try
             {
-                var connection = createConnection();
+                var connection = CreateConnection();
                 var command = connection.CreateCommand();
                 command.CommandText = "select 1 from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
                                       "` where `steamId` = '" + steamId +
@@ -47,6 +45,7 @@ namespace fr34kyn01535.GlobalBan
                 connection.Open();
                 var result = command.ExecuteScalar();
                 if (result != null) return true;
+
                 connection.Close();
             }
             catch (Exception ex)
@@ -62,31 +61,34 @@ namespace fr34kyn01535.GlobalBan
             public int Duration;
             public DateTime Time;
             public string Admin;
+            public string Reason;
         }
-
 
         public Ban GetBan(string steamId)
         {
             try
             {
-                var connection = createConnection();
+                var connection = CreateConnection();
                 var command = connection.CreateCommand();
-                command.CommandText = "select  `banDuration`,`banTime`,`admin` from `" +
+                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
                                       GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
                                       "` where `steamId` = '" + steamId +
                                       "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
                 connection.Open();
-                var result = command.ExecuteReader(System.Data.CommandBehavior.SingleRow);
-                if (result != null && result.Read() && result.HasRows)
-                    return new Ban()
+                var result = command.ExecuteReader(CommandBehavior.SingleRow);
+                if (result?.Read() == true && result.HasRows)
+                    return new Ban
                     {
                         Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
                         Time = (DateTime) result["banTime"],
                         Admin = result["admin"] == DBNull.Value ||
                                 result["admin"].ToString() == "Rocket.API.ConsolePlayer"
                             ? "Console"
-                            : (string) result["admin"]
+                            : (string) result["admin"],
+                        Reason =
+                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
                     };
+
                 connection.Close();
             }
             catch (Exception ex)
@@ -101,7 +103,7 @@ namespace fr34kyn01535.GlobalBan
         {
             try
             {
-                var connection = createConnection();
+                var connection = CreateConnection();
                 var command = connection.CreateCommand();
                 command.CommandText = "show tables like '" +
                                       GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "'";
@@ -124,15 +126,15 @@ namespace fr34kyn01535.GlobalBan
             }
         }
 
-        public void BanPlayer(string characterName, string steamid, string admin, string banMessage, int duration)
+        public void BanPlayer(string characterName, string steamId, string admin, string banMessage, int duration)
         {
             try
             {
                 characterName = Regex.Replace(characterName, @"\p{Cs}", "");
-                var connection = createConnection();
+                var connection = CreateConnection();
                 var command = connection.CreateCommand();
                 if (banMessage == null) banMessage = "";
-                command.Parameters.AddWithValue("@csteamid", steamid);
+                command.Parameters.AddWithValue("@csteamid", steamId);
                 command.Parameters.AddWithValue("@admin", admin);
                 command.Parameters.AddWithValue("@charactername", characterName);
                 command.Parameters.AddWithValue("@banMessage", banMessage);
@@ -160,9 +162,11 @@ namespace fr34kyn01535.GlobalBan
 
         public UnbanResult UnbanPlayer(string player)
         {
+            UnbanResult result = null;
+
             try
             {
-                var connection = createConnection();
+                var connection = CreateConnection();
 
                 var command = connection.CreateCommand();
                 command.Parameters.AddWithValue("@player", "%" + player + "%");
@@ -174,7 +178,7 @@ namespace fr34kyn01535.GlobalBan
                 if (reader.Read())
                 {
                     var steamId = reader.GetUInt64(0);
-                    var charactername = reader.GetString(1);
+                    var characterName = reader.GetString(1);
                     connection.Close();
                     command = connection.CreateCommand();
                     command.Parameters.AddWithValue("@steamId", steamId);
@@ -184,7 +188,7 @@ namespace fr34kyn01535.GlobalBan
                     connection.Open();
                     command.ExecuteNonQuery();
                     connection.Close();
-                    return new UnbanResult() {Id = steamId, Name = charactername};
+                    result = new UnbanResult {Id = steamId, Name = characterName};
                 }
             }
             catch (Exception ex)
@@ -192,7 +196,7 @@ namespace fr34kyn01535.GlobalBan
                 Logger.LogException(ex);
             }
 
-            return null;
+            return result;
         }
     }
 }
