@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using Rocket.API;
 using Rocket.Unturned.Chat;
 using SDG.Unturned;
@@ -30,9 +32,26 @@ namespace fr34kyn01535.GlobalBan.Commands
 
             var name = GlobalBan.Instance.database.UnbanPlayer(command[0]);
             if (!SteamBlacklist.unban(new CSteamID(name.Id)) && string.IsNullOrEmpty(name.Name))
+            {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+            }
             else
+            {
                 UnturnedChat.Say("The player " + name.Name + " was unbanned");
+
+                Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhook,
+                    Discord.BuildDiscordEmbed("A player was unbanned from the server.",
+                        $"{name.Name} was unbanned from the server.", "Global Ban",
+                        "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                        GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
+                        new[]
+                        {
+                            Discord.BuildDiscordField("Steam64ID", name.Id.ToString(), true),
+                            Discord.BuildDiscordField("Unbanned By", caller.DisplayName, true),
+                            Discord.BuildDiscordField("Time of Unban",
+                                DateTime.Now.ToString(CultureInfo.InvariantCulture), false)
+                        }));
+            }
         }
     }
 }

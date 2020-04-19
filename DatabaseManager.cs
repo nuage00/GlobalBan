@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using I18N.West;
 using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
+using SDG.Unturned;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -64,6 +65,76 @@ namespace fr34kyn01535.GlobalBan
             public string Reason;
         }
 
+        public Ban GetBan(uint ip)
+        {
+            try
+            {
+                var connection = CreateConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
+                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
+                                      "` where `ip` = '" + ip +
+                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
+                connection.Open();
+                var result = command.ExecuteReader(CommandBehavior.SingleRow);
+                if (result?.Read() == true && result.HasRows)
+                    return new Ban
+                    {
+                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
+                        Time = (DateTime) result["banTime"],
+                        Admin = result["admin"] == DBNull.Value ||
+                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
+                            ? "Console"
+                            : (string) result["admin"],
+                        Reason =
+                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
+                    };
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+
+            return null;
+        }
+
+        public Ban GetHwidBan(string hwid)
+        {
+            try
+            {
+                var connection = CreateConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
+                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
+                                      "` where `hwid` = '" + hwid +
+                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
+                connection.Open();
+                var result = command.ExecuteReader(CommandBehavior.SingleRow);
+                if (result?.Read() == true && result.HasRows)
+                    return new Ban
+                    {
+                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
+                        Time = (DateTime) result["banTime"],
+                        Admin = result["admin"] == DBNull.Value ||
+                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
+                            ? "Console"
+                            : (string) result["admin"],
+                        Reason =
+                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
+                    };
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+
+            return null;
+        }
+
         public Ban GetBan(string steamId)
         {
             try
@@ -114,7 +185,7 @@ namespace fr34kyn01535.GlobalBan
                 {
                     command.CommandText = "CREATE TABLE `" +
                                           GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                          "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(32) NOT NULL,`admin` varchar(32) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL,`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
+                                          "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(128) NOT NULL,`ip` INT UNSIGNED NOT NULL,`hwid` VARCHAR(128),`admin` varchar(128) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL, `server` VARCHAR(50) DEFAULT 'Unturned Server',`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
                     command.ExecuteNonQuery();
                 }
 
@@ -126,7 +197,8 @@ namespace fr34kyn01535.GlobalBan
             }
         }
 
-        public void BanPlayer(string characterName, string steamId, string admin, string banMessage, int duration)
+        public void BanPlayer(string characterName, string steamId, uint ip, string hwid, string admin,
+            string banMessage, int duration)
         {
             try
             {
@@ -142,8 +214,13 @@ namespace fr34kyn01535.GlobalBan
                     command.Parameters.AddWithValue("@banDuration", DBNull.Value);
                 else
                     command.Parameters.AddWithValue("@banDuration", duration);
+
+                command.Parameters.AddWithValue("@serverName", Provider.serverName);
+                command.Parameters.AddWithValue("@ip", ip);
+                command.Parameters.AddWithValue("@hwid", hwid);
+
                 command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` (`steamId`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@admin,@banMessage,@charactername,now(),@banDuration);";
+                                      "` (`steamId`,`ip`,`hwid`,`server`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@ip,@hwid,@serverName,@admin,@banMessage,@charactername,now(),@banDuration);";
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
