@@ -89,7 +89,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
                         Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
                             Discord.BuildDiscordEmbed("A player was banned from the server.",
-                                $"{otherPlayer.CharacterName} was banned from the server for {command[1]}!",
+                                $"{characterName} was banned from the server for {command[1]}!",
                                 "Global Ban",
                                 "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
                                 GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
@@ -119,7 +119,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
                     Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
                         Discord.BuildDiscordEmbed("A player was banned from the server.",
-                            $"{otherPlayer.CharacterName} was banned from the server for {command[1]}!", "Global Ban",
+                            $"{characterName} was banned from the server for {command[1]}!", "Global Ban",
                             "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
                             GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
                             new[]
@@ -143,7 +143,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
                     Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
                         Discord.BuildDiscordEmbed("A player was banned from the server.",
-                            $"{otherPlayer.CharacterName} was banned from the server for {GlobalBan.Instance.Translate("command_ban_private_default_reason")}!",
+                            $"{characterName} was banned from the server for {GlobalBan.Instance.Translate("command_ban_private_default_reason")}!",
                             "Global Ban",
                             "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
                             GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
