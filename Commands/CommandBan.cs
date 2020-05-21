@@ -87,9 +87,14 @@ namespace fr34kyn01535.GlobalBan.Commands
                         target is UnturnedPlayer tPlayer ? tPlayer.SteamPlayer().playerID.hwid : new byte[0]);
             }
 
+            ulong adminId = 0;
+
+            if (caller is UnturnedPlayer cPlayer)
+                adminId = cPlayer.CSteamID.m_SteamID;
+
             var adminName = caller.DisplayName;
 
-            GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName, reason,
+            GlobalBan.Instance.database.BanPlayer(steamId.m_SteamID, ip, hwid, adminId, reason,
                 totalTime);
             UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, reason));
             if (target is UnturnedPlayer)

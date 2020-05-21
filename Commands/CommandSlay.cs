@@ -47,6 +47,12 @@ namespace fr34kyn01535.GlobalBan.Commands
             }
 
             var reason = string.Join(" ", args);
+
+            ulong adminId = 0;
+
+            if (caller is UnturnedPlayer cPlayer)
+                adminId = cPlayer.CSteamID.m_SteamID;
+
             var adminName = caller.DisplayName;
             var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
             var characterName = pData?.CharacterName ?? target.DisplayName;
@@ -56,7 +62,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                 ? string.Join("", pData.Hwid)
                 : string.Join("", target is UnturnedPlayer tPlayer ? tPlayer.SteamPlayer().playerID.hwid : new byte[0]);
 
-            GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName, reason,
+            GlobalBan.Instance.database.BanPlayer(steamId.m_SteamID, ip, hwid, adminId, reason,
                 uint.MaxValue);
             UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, reason));
             if (target is UnturnedPlayer)

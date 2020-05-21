@@ -44,14 +44,13 @@ namespace fr34kyn01535.GlobalBan.Commands
             }
 
             var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
-
-            var allBans = GlobalBan.Instance.database.GetBans(target.Id);
+            var allBans = GlobalBan.Instance.database.GetBans(ulong.Parse(target.Id));
 
             UnturnedChat.Say(caller,
                 GlobalBan.Instance.Translate("ban_history", pData?.CharacterName ?? target.DisplayName, allBans.Count,
                     string.Join(";",
-                        allBans.OrderByDescending(k => k.Time).Take(3).Select(k =>
-                            $"Date: {k.Time}, Reason: {k.Reason}, For: {k.Duration}, By: {k.Admin}"))));
+                        allBans.OrderByDescending(k => k.TimeOfBan).Take(3).Select(k =>
+                            $"Date: {k.TimeOfBan}, Reason: {k.Reason}, For: {k.Duration}, By: {k.Admin}"))));
         }
     }
 }

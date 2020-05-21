@@ -1,323 +1,126 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Text.RegularExpressions;
+﻿using fr34kyn01535.GlobalBan.Config;
 using I18N.West;
+using Pustalorc.Libraries.MySqlConnectorWrapper;
+using Pustalorc.Libraries.MySqlConnectorWrapper.Queries;
+using Pustalorc.Libraries.MySqlConnectorWrapper.TableStructure;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using MySql.Data.MySqlClient;
-using Rocket.Core.Logging;
-using SDG.Unturned;
+using PlayerInfoLibrary;
 
 namespace fr34kyn01535.GlobalBan.API
 {
-    public class DatabaseManager
+    public class DatabaseManager : ConnectorWrapper<GlobalBanConfiguration>
     {
-        public DatabaseManager()
+        private Dictionary<Query, Query> _createTableQueries;
+        private Query _getPlayerDataQuery;
+
+        [NotNull]
+        private Dictionary<Query, Query> CreateTableQueries => _createTableQueries ??= new Dictionary<Query, Query>
         {
+            {
+                new Query($"SHOW TABLES LIKE '{Configuration.DatabaseTableName}';", EQueryType.Scalar),
+                new Query(
+                    $"CREATE TABLE `{Configuration.DatabaseTableName}` (`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, `steamId` BIGINT UNSIGNED NOT NULL, `ip` INT UNSIGNED NOT NULL, `hwid` VARCHAR(255) NOT NULL DEFAULT '', `adminId` BIGINT UNSIGNED NOT NULL DEFAULT 0, `banMessage` VARCHAR(512) NOT NULL DEFAULT 'N/A', `banDuration` INT UNSIGNED, `serverId` SMALLINT UNSIGNED, `banTime` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, `unbanned` BOOLEAN NOT NULL DEFAULT FALSE, PRIMARY KEY (`id`));",
+                    EQueryType.NonQuery)
+            }
+        };
+
+        [NotNull]
+        public Query GetPlayerDataQuery => _getPlayerDataQuery ??= new Query(
+            $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1;",
+            EQueryType.Reader, FetchedBans, true);
+
+        private List<PlayerBan> _allBans = new List<PlayerBan>();
+
+        public DatabaseManager(GlobalBanConfiguration config) : base(config)
+        {
+            // ReSharper disable once ObjectCreationAsStatement
             new CP1250();
-            CheckSchema();
+
+            var output = ExecuteTransaction(CreateTableQueries.Keys.ToArray()).ToList();
+            var execute = (from queryResult in output
+                where queryResult.Output == null
+                select CreateTableQueries[queryResult.Query]).ToArray();
+
+            if (execute.Length > 0)
+                ExecuteTransaction(execute);
+
+            ExecuteQuery(GetPlayerDataQuery);
+        }
+
+        private void FetchedBans([NotNull] QueryOutput queryOutput)
+        {
+            if (queryOutput.Query.QueryType != EQueryType.Reader || !(queryOutput.Output is List<Row> rows)) return;
+
+            lock (_allBans)
+            {
+                _allBans = (from row in rows select BuildBanData(row)).ToList();
+            }
+        }
+
+        public bool IsBanned(uint ip)
+        {
+            return ip != uint.MaxValue && _allBans.Any(k => k.Ip != uint.MaxValue && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Ip == ip);
+        }
+
+        public bool IsBanned([CanBeNull] string hwid)
+        {
+            return !string.IsNullOrEmpty(hwid) && _allBans.Any(k => !string.IsNullOrEmpty(k.Hwid) && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Hwid == hwid);
         }
 
         [CanBeNull]
-        private MySqlConnection CreateConnection()
+        public PlayerBan GetValidBan(ulong id)
         {
-            MySqlConnection connection = null;
-            try
-            {
-                if (GlobalBan.Instance.Configuration.Instance.DatabasePort == 0)
-                    GlobalBan.Instance.Configuration.Instance.DatabasePort = 3306;
-                connection = new MySqlConnection(
-                    $"SERVER={GlobalBan.Instance.Configuration.Instance.DatabaseAddress};DATABASE={GlobalBan.Instance.Configuration.Instance.DatabaseName};UID={GlobalBan.Instance.Configuration.Instance.DatabaseUsername};PASSWORD={GlobalBan.Instance.Configuration.Instance.DatabasePassword};PORT={GlobalBan.Instance.Configuration.Instance.DatabasePort};");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return connection;
-        }
-
-        public bool IsBanned(string steamId)
-        {
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "select 1 from `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `steamId` = '" + steamId +
-                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
-                connection.Open();
-                var result = command.ExecuteScalar();
-                if (result != null) return true;
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return false;
-        }
-
-        public class Ban
-        {
-            public int Duration;
-            public DateTime Time;
-            public string Admin;
-            public string Reason;
-        }
-
-        [CanBeNull]
-        public Ban GetBan(uint ip)
-        {
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `ip` = '" + ip +
-                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
-                connection.Open();
-                var result = command.ExecuteReader(CommandBehavior.SingleRow);
-                if (result?.Read() == true && result.HasRows)
-                    return new Ban
-                    {
-                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
-                        Time = (DateTime) result["banTime"],
-                        Admin = result["admin"] == DBNull.Value ||
-                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
-                            ? "Console"
-                            : (string) result["admin"],
-                        Reason =
-                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
-                    };
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return null;
-        }
-
-        [CanBeNull]
-        public Ban GetHwidBan(string hwid)
-        {
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `hwid` = '" + hwid +
-                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
-                connection.Open();
-                var result = command.ExecuteReader(CommandBehavior.SingleRow);
-                if (result?.Read() == true && result.HasRows)
-                    return new Ban
-                    {
-                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
-                        Time = (DateTime) result["banTime"],
-                        Admin = result["admin"] == DBNull.Value ||
-                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
-                            ? "Console"
-                            : (string) result["admin"],
-                        Reason =
-                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
-                    };
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return null;
-        }
-
-        [CanBeNull]
-        public Ban GetBan(string steamId)
-        {
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `steamId` = '" + steamId +
-                                      "' and (banDuration is null or ((banDuration + UNIX_TIMESTAMP(banTime)) > UNIX_TIMESTAMP()));";
-                connection.Open();
-                var result = command.ExecuteReader(CommandBehavior.SingleRow);
-                if (result?.Read() == true && result.HasRows)
-                    return new Ban
-                    {
-                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
-                        Time = (DateTime) result["banTime"],
-                        Admin = result["admin"] == DBNull.Value ||
-                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
-                            ? "Console"
-                            : (string) result["admin"],
-                        Reason =
-                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
-                    };
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return null;
+            return GetValidBans(id).FirstOrDefault();
         }
 
         [NotNull]
-        public List<Ban> GetBans(string steamId)
+        public IEnumerable<PlayerBan> GetValidBans(ulong id)
         {
-            var output = new List<Ban>();
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `steamId` = '" + steamId +
-                                      "';";
-                connection.Open();
-                var result = command.ExecuteReader(CommandBehavior.SingleRow);
-                if (result?.Read() == true && result.HasRows)
-                    output.Add(new Ban
-                    {
-                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
-                        Time = (DateTime) result["banTime"],
-                        Admin = result["admin"] == DBNull.Value ||
-                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
-                            ? "Console"
-                            : (string) result["admin"],
-                        Reason =
-                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
-                    });
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return output;
+            return GetBans(id).Where(k => !k.Unbanned && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now).ToList();
         }
 
-        public void CheckSchema()
+        [NotNull]
+        public List<PlayerBan> GetBans(ulong id)
         {
-            try
-            {
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "show tables like '" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName + "'";
-                connection.Open();
-                var test = command.ExecuteScalar();
-
-                if (test == null)
-                {
-                    command.CommandText = "CREATE TABLE `" +
-                                          GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                          "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(128) NOT NULL,`ip` INT UNSIGNED NOT NULL,`hwid` VARCHAR(128),`admin` varchar(128) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` INT UNSIGNED NULL, `server` VARCHAR(50) DEFAULT 'Unturned Server',`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
+            return _allBans.Where(k => k.SteamId == id).ToList();
         }
 
-        public void BanPlayer(string characterName, string steamId, uint ip, string hwid, string admin,
-            string banMessage, uint duration)
+        public void BanPlayer(ulong steamId, uint ip, string hwid, ulong admin, [CanBeNull] string banMessage, uint duration)
         {
-            try
-            {
-                characterName = Regex.Replace(characterName, @"\p{Cs}", "");
-                var connection = CreateConnection();
-                var command = connection.CreateCommand();
-                if (banMessage == null) banMessage = "";
-                command.Parameters.AddWithValue("@csteamid", steamId);
-                command.Parameters.AddWithValue("@admin", admin);
-                command.Parameters.AddWithValue("@charactername", characterName);
-                command.Parameters.AddWithValue("@banMessage", banMessage);
-                if (duration == 0)
-                    command.Parameters.AddWithValue("@banDuration", DBNull.Value);
-                else
-                    command.Parameters.AddWithValue("@banDuration", duration);
-
-                command.Parameters.AddWithValue("@serverName", Provider.serverName);
-                command.Parameters.AddWithValue("@ip", ip);
-                command.Parameters.AddWithValue("@hwid", hwid);
-
-                command.CommandText = "insert into `" + GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` (`steamId`,`ip`,`hwid`,`server`,`admin`,`banMessage`,`charactername`,`banTime`,`banDuration`) values(@csteamid,@ip,@hwid,@serverName,@admin,@banMessage,@charactername,now(),@banDuration);";
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
+            RequestQueryExecute(false,
+                new Query(
+                    $"INSERT INTO `{Configuration.DatabaseTableName}` (`steamId`,`ip,`hwid`,`adminId`,`banMessage`,`banDuration`,`serverId`,`banTime`) VALUES(@playerId,@ip,@hwid,@admin,@banMessage,@banDuration,@serverId,now())",
+                    EQueryType.NonQuery, null, false, new MySqlParameter("@playerId", steamId),
+                    new MySqlParameter("@ip", ip), new MySqlParameter("@hwid", hwid),
+                    new MySqlParameter("@admin", admin),
+                    new MySqlParameter("@banMessage", string.IsNullOrEmpty(banMessage) ? "N/A" : banMessage),
+                    duration == 0
+                        ? new MySqlParameter("@banDuration", DBNull.Value)
+                        : new MySqlParameter("@banDuration", duration),
+                    new MySqlParameter("@serverId", PlayerInfoLib.Instance.database.InstanceId)));
         }
 
-        public class UnbanResult
+        public bool TryUnban(ulong id)
         {
-            public ulong Id;
-            public string Name;
+            var bans = GetBans(id).Where(k => k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now).ToList();
+            if (bans.Count == 0)
+                return false;
+
+            RequestQueryExecute(true, bans.Select(ban => new Query($"UPDATE `{Configuration.DatabaseTableName}` SET `unbanned`=TRUE WHERE `id`={ban.BanEntryId}", EQueryType.NonQuery)).ToArray());
+            return true;
         }
 
-        [CanBeNull]
-        public UnbanResult UnbanPlayer(string player)
+        [NotNull]
+        private static PlayerBan BuildBanData([NotNull] Row row)
         {
-            UnbanResult result = null;
-
-            try
-            {
-                var connection = CreateConnection();
-
-                var command = connection.CreateCommand();
-                command.Parameters.AddWithValue("@player", "%" + player + "%");
-                command.CommandText = "select steamId,charactername from `" +
-                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                      "` where `steamId` like @player or `charactername` like @player limit 1;";
-                connection.Open();
-                var reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    var steamId = reader.GetUInt64(0);
-                    var characterName = reader.GetString(1);
-                    connection.Close();
-                    command = connection.CreateCommand();
-                    command.Parameters.AddWithValue("@steamId", steamId);
-                    command.CommandText = "delete from `" +
-                                          GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                          "` where `steamId` = @steamId;";
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                    connection.Close();
-                    result = new UnbanResult {Id = steamId, Name = characterName};
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex);
-            }
-
-            return result;
+            return new PlayerBan(ulong.Parse(row["id"].ToString()), ulong.Parse(row["steamId"].ToString()),
+                row["hwid"].ToString(), uint.Parse(row["ip"].ToString()), uint.Parse(row["banDuration"].ToString()),
+                (DateTime) row["banTime"], ulong.Parse(row["adminId"].ToString()), row["banMessage"].ToString(),
+                ushort.Parse(row["serverId"].ToString()), bool.Parse(row["unbanned"].ToString()));
         }
     }
 }

@@ -14,6 +14,7 @@
     <ProductVersion>12.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <TargetFrameworkProfile />
+    <LangVersion>latestmajor</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="API\Extensions.cs" />
+    <Compile Include="API\PlayerBan.cs" />
     <Compile Include="Commands\CommandBan.cs" />
     <Compile Include="Commands\CommandBanHistory.cs" />
     <Compile Include="Commands\CommandKick.cs" />

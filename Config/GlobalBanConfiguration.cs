@@ -1,15 +1,19 @@
-﻿using Rocket.API;
+﻿using Pustalorc.Libraries.MySqlConnectorWrapper.Configuration;
+using Rocket.API;
 
 namespace fr34kyn01535.GlobalBan.Config
 {
-    public class GlobalBanConfiguration : IRocketPluginConfiguration
+    public class GlobalBanConfiguration : IConnectorConfiguration, IRocketPluginConfiguration
     {
-        public string DatabaseAddress;
-        public string DatabaseUsername;
-        public string DatabasePassword;
-        public string DatabaseName;
+        public string DatabaseAddress { get; set; }
+        public string DatabaseUsername { get; set; }
+        public string DatabasePassword { get; set; }
+        public string DatabaseName { get; set; }
         public string DatabaseTableName;
-        public int DatabasePort;
+        public ushort DatabasePort { get; set; }
+        public bool UseCache { get; set; }
+        public ulong CacheRefreshIntervalMilliseconds { get; set; }
+
         public string DiscordKickWebhook;
         public int DiscordKickWebhookColor;
         public string DiscordBanWebhook;
@@ -26,6 +30,8 @@ namespace fr34kyn01535.GlobalBan.Config
             DatabaseName = "unturned";
             DatabaseTableName = "banlist";
             DatabasePort = 3306;
+            UseCache = true;
+            CacheRefreshIntervalMilliseconds = 30000;
             DiscordKickWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
             DiscordKickWebhookColor = 16776960;
             DiscordBanWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";

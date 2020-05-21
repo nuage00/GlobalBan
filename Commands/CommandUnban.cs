@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using fr34kyn01535.GlobalBan.API;
 using JetBrains.Annotations;
+using PlayerInfoLibrary;
 using Rocket.API;
 using Rocket.Unturned.Chat;
-using SDG.Unturned;
 using Steamworks;
 
 namespace fr34kyn01535.GlobalBan.Commands
@@ -26,34 +27,46 @@ namespace fr34kyn01535.GlobalBan.Commands
 
         public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
-            if (command.Length != 1)
+            if (command.Length == 0)
             {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
                 return;
             }
 
-            var name = GlobalBan.Instance.database.UnbanPlayer(command[0]);
-            if (!SteamBlacklist.unban(new CSteamID(name.Id)) && string.IsNullOrEmpty(name.Name))
+            var args = command.ToList();
+            var target = args.GetIRocketPlayer(out var index);
+            if (index > -1)
+                args.RemoveAt(index);
+
+            if (target == null)
             {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                return;
             }
-            else
-            {
-                UnturnedChat.Say("The player " + name.Name + " was unbanned");
 
-                Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhook,
-                    Discord.BuildDiscordEmbed("A player was unbanned from the server.",
-                        $"{name.Name} was unbanned from the server.", "Global Ban",
-                        "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
-                        GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
-                        new[]
-                        {
-                            Discord.BuildDiscordField("Steam64ID", name.Id.ToString(), true),
-                            Discord.BuildDiscordField("Unbanned By", caller.DisplayName, true),
-                            Discord.BuildDiscordField("Time of Unban",
-                                DateTime.Now.ToString(CultureInfo.InvariantCulture), false)
-                        }));
+            var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
+
+            if (!GlobalBan.Instance.database.TryUnban(ulong.Parse(target.Id)))
+            {
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                return;
             }
+
+            var characterName = pData?.CharacterName ?? target.DisplayName;
+
+            UnturnedChat.Say("The player " + characterName + " was unbanned");
+            Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhook,
+                Discord.BuildDiscordEmbed("A player was unbanned from the server.",
+                    $"{characterName} was unbanned from the server.", "Global Ban",
+                    "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                    GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
+                    new[]
+                    {
+                        Discord.BuildDiscordField("Steam64ID", target.Id, true),
+                        Discord.BuildDiscordField("Unbanned By", caller.DisplayName, true),
+                        Discord.BuildDiscordField("Time of Unban",
+                            DateTime.Now.ToString(CultureInfo.InvariantCulture), false)
+                    }));
         }
     }
 }

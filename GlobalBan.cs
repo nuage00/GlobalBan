@@ -24,7 +24,7 @@ namespace fr34kyn01535.GlobalBan
         protected override void Load()
         {
             Instance = this;
-            database = new DatabaseManager();
+            database = new DatabaseManager(Configuration.Instance);
             Provider.onCheckValid += Events_OnJoinRequested;
             U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
         }
@@ -56,21 +56,19 @@ namespace fr34kyn01535.GlobalBan
             var playerIp = playerId.GetIp();
             var playerHwid = string.Join("", player.SteamPlayer().playerID.hwid);
 
-            var idBan = database.GetBan(playerId.ToString());
-            var ipBan = playerIp == uint.MaxValue ? null : database.GetBan(playerIp);
-            var hwidBan = string.IsNullOrEmpty(playerHwid) ? null : database.GetHwidBan(playerHwid);
+            var idBan = database.GetValidBan(playerId.m_SteamID);
+            var ipBan = database.IsBanned(playerIp);
+            var hwidBan = database.IsBanned(playerHwid);
 
-            if (idBan == null && ipBan == null && hwidBan == null) return;
+            if (idBan == null && !ipBan && !hwidBan) return;
 
-            if (ipBan != null)
-                IpBanEvading(player.CharacterName, playerId, playerIp, playerHwid);
-            else if (hwidBan != null)
-                HwidBanEvading(player.CharacterName, playerId, playerIp, playerHwid);
+            if (ipBan || hwidBan)
+                BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
             else
                 RemovePlayerWithBan(playerId,
                     idBan.Duration == -1
                         ? uint.MaxValue
-                        : (uint) idBan.Time.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
+                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
                     idBan.Reason);
         }
 
@@ -89,43 +87,29 @@ namespace fr34kyn01535.GlobalBan
                 playerHwid = pData.Hwid;
             }
 
-            var idBan = database.GetBan(playerId.ToString());
-            var ipBan = playerIp != uint.MaxValue ? database.GetBan(playerIp) : null;
-            var hwidBan = string.IsNullOrEmpty(playerHwid) ? null : database.GetHwidBan(playerHwid);
+            var idBan = database.GetValidBan(playerId.m_SteamID);
+            var ipBan = database.IsBanned(playerIp);
+            var hwidBan = database.IsBanned(playerHwid);
 
-            if (idBan == null && ipBan == null && hwidBan == null) return;
+            if (idBan == null && !ipBan && !hwidBan) return;
 
             isValid = false;
 
-            if (ipBan != null)
-                IpBanEvading(characterName, playerId, playerIp, playerHwid);
-            else if (hwidBan != null)
-                HwidBanEvading(characterName, playerId, playerIp, playerHwid);
+            if (ipBan || hwidBan)
+                BanEvading(characterName, playerId, playerIp, playerHwid);
             else
                 RemovePlayerWithBan(playerId,
                     idBan.Duration == -1
                         ? uint.MaxValue
-                        : (uint) idBan.Time.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
+                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
                     idBan.Reason);
         }
 
-        private void IpBanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
+        private void BanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
         {
-            const string banReason = "Ban Evading (IP)";
+            const string banReason = "Ban Evading";
 
-            database.BanPlayer(playerName, playerId.ToString(), playerIp, playerHwid, "Global Ban", banReason, 0);
-
-            UnturnedChat.Say(Translate("command_ban_public", playerName));
-
-            SendBanWebhook(playerName, banReason, playerId.ToString(), uint.MaxValue);
-            RemovePlayerWithBan(playerId, uint.MaxValue, banReason);
-        }
-
-        public void HwidBanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
-        {
-            const string banReason = "Ban Evading (HWID)";
-
-            database.BanPlayer(playerName, playerId.ToString(), playerIp, playerHwid, "Global Ban", banReason, 0);
+            database.BanPlayer(playerId.m_SteamID, playerIp, playerHwid, 0, banReason, 0);
 
             UnturnedChat.Say(Translate("command_ban_public", playerName));
 
