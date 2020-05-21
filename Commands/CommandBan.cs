@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using fr34kyn01535.GlobalBan.API;
+using JetBrains.Annotations;
+using PlayerInfoLibrary;
 using Rocket.API;
-using Rocket.Core.Logging;
-using Rocket.Core.Steam;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Commands;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
@@ -14,155 +15,101 @@ namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandBan : IRocketCommand
     {
-        public string Help => "Bans a player";
+        [NotNull] public string Help => "Bans a player";
 
-        public string Name => "ban";
+        [NotNull] public string Name => "ban";
 
-        public string Syntax => "<player> [reason] [duration]";
+        [NotNull] public string Syntax => "<player> [reason] [duration]";
 
-        public List<string> Aliases => new List<string>();
+        [NotNull] public List<string> Aliases => new List<string>();
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string> {"globalban.ban"};
+        [NotNull] public List<string> Permissions => new List<string> {"globalban.ban"};
 
-        public void Execute(IRocketPlayer caller, params string[] command)
+        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
-            try
+            if (command.Length == 0)
             {
-                if (command.Length == 0 || command.Length > 3)
-                {
-                    UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
-                    return;
-                }
-
-                var isOnline = false;
-
-                CSteamID steamId;
-                var ip = uint.MinValue;
-                string hwid = null;
-                string characterName = null;
-
-
-                var otherPlayer = UnturnedPlayer.FromName(command[0]);
-                var otherPlayerId = command.GetCSteamIDParameter(0);
-                if (otherPlayer == null || otherPlayer.CSteamID.ToString() == "0" ||
-                    caller != null && otherPlayer.CSteamID.ToString() == caller.Id)
-                {
-                    if (otherPlayerId != null)
-                    {
-                        steamId = new CSteamID(otherPlayerId.Value);
-                        var playerProfile = new Profile(otherPlayerId.Value);
-                        characterName = playerProfile.SteamID;
-                    }
-                    else
-                    {
-                        UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                        return;
-                    }
-                }
-                else
-                {
-                    isOnline = true;
-                    steamId = otherPlayer.CSteamID;
-                    SteamGameServerNetworking.GetP2PSessionState(steamId, out var state);
-                    ip = state.m_nRemoteIP;
-                    hwid = string.Join("", otherPlayer.SteamPlayer().playerID.hwid);
-                    characterName = otherPlayer.CharacterName;
-                }
-
-                var adminName = "Console";
-                if (caller != null) adminName = caller.ToString();
-
-                // ReSharper disable once ConvertIfStatementToSwitchStatement
-                if (command.Length == 3)
-                {
-                    var duration = 0;
-                    if (GlobalBan.TryConvertTimeToSeconds(command[2], out duration))
-                    {
-                        GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName,
-                            command[1], duration);
-                        UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName,
-                            command[1]));
-                        if (isOnline)
-                            Provider.ban(steamId, command[1], (uint) duration);
-
-                        Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
-                            Discord.BuildDiscordEmbed("A player was banned from the server.",
-                                $"{characterName} was banned from the server for {command[1]}!",
-                                "Global Ban",
-                                "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
-                                GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
-                                new[]
-                                {
-                                    Discord.BuildDiscordField("Steam64ID", steamId.ToString(), true),
-                                    Discord.BuildDiscordField("Banned By", caller.DisplayName, true),
-                                    Discord.BuildDiscordField("Time of Ban",
-                                        DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                                    Discord.BuildDiscordField("Reason of Ban", command[1], true),
-                                    Discord.BuildDiscordField("Ban duration", duration.ToString(), true)
-                                }));
-                    }
-                    else
-                    {
-                        UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
-                    }
-                }
-                else if (command.Length == 2)
-                {
-                    GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName,
-                        command[1], 0);
-                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName,
-                        command[1]));
-                    if (isOnline)
-                        Provider.ban(steamId, command[1], uint.MaxValue);
-
-                    Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
-                        Discord.BuildDiscordEmbed("A player was banned from the server.",
-                            $"{characterName} was banned from the server for {command[1]}!", "Global Ban",
-                            "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
-                            GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
-                            new[]
-                            {
-                                Discord.BuildDiscordField("Steam64ID", steamId.ToString(), true),
-                                Discord.BuildDiscordField("Banned By", caller.DisplayName, true),
-                                Discord.BuildDiscordField("Time of Ban",
-                                    DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                                Discord.BuildDiscordField("Reason of Ban", command[1], true),
-                                Discord.BuildDiscordField("Ban duration", uint.MaxValue.ToString(), true)
-                            }));
-                }
-                else
-                {
-                    GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName, "",
-                        0);
-                    UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public", characterName));
-                    if (isOnline)
-                        Provider.ban(steamId, GlobalBan.Instance.Translate("command_ban_private_default_reason"),
-                            uint.MaxValue);
-
-                    Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
-                        Discord.BuildDiscordEmbed("A player was banned from the server.",
-                            $"{characterName} was banned from the server for {GlobalBan.Instance.Translate("command_ban_private_default_reason")}!",
-                            "Global Ban",
-                            "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
-                            GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
-                            new[]
-                            {
-                                Discord.BuildDiscordField("Steam64ID", steamId.ToString(), true),
-                                Discord.BuildDiscordField("Banned By", caller.DisplayName, true),
-                                Discord.BuildDiscordField("Time of Ban",
-                                    DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                                Discord.BuildDiscordField("Reason of Ban",
-                                    GlobalBan.Instance.Translate("command_ban_private_default_reason"), true),
-                                Discord.BuildDiscordField("Ban duration", uint.MaxValue.ToString(), true)
-                            }));
-                }
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                return;
             }
-            catch (Exception ex)
+
+            var args = command.ToList();
+
+            var target = args.GetIRocketPlayer(out var index);
+            if (index > -1)
+                args.RemoveAt(index);
+
+            if (target == null)
             {
-                Logger.LogException(ex);
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                return;
             }
+
+            var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
+
+            var totalTime = args.GetUInt(out index);
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += (uint) args.GetUShortWithSuffix("mo", out index) * 2419200;
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += (uint) args.GetUShortWithSuffix("w", out index) * 604800;
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += (uint) args.GetUShortWithSuffix("d", out index) * 86400;
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += (uint) args.GetUShortWithSuffix("h", out index) * 3600;
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += (uint) args.GetUShortWithSuffix("m", out index) * 60;
+            if (index > -1)
+                args.RemoveAt(index);
+            totalTime += args.GetUShortWithSuffix("s", out index);
+            if (index > -1)
+                args.RemoveAt(index);
+
+            var reason = string.Join(" ", args);
+            var characterName = pData?.CharacterName ?? target.DisplayName;
+            var steamId = pData?.SteamId ?? new CSteamID(ulong.Parse(target.Id));
+
+            var ip = uint.MaxValue;
+            var hwid = "";
+
+            if (GlobalBan.Instance.Configuration.Instance.BanCommandAlsoIpAndHwidBans)
+            {
+                ip = pData?.Ip ?? steamId.GetIp();
+                hwid = pData != null
+                    ? string.Join("", pData.Hwid)
+                    : string.Join("",
+                        target is UnturnedPlayer tPlayer ? tPlayer.SteamPlayer().playerID.hwid : new byte[0]);
+            }
+
+            var adminName = caller.DisplayName;
+
+            GlobalBan.Instance.database.BanPlayer(characterName, steamId.ToString(), ip, hwid, adminName, reason,
+                totalTime);
+            UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, reason));
+            if (target is UnturnedPlayer)
+                Provider.ban(steamId, reason, totalTime);
+
+            Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
+                Discord.BuildDiscordEmbed("A player was banned from the server.",
+                    $"{characterName} was banned from the server for {reason}!",
+                    "Global Ban",
+                    "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                    GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
+                    new[]
+                    {
+                        Discord.BuildDiscordField("Steam64ID", steamId.ToString(), true),
+                        Discord.BuildDiscordField("Banned By", adminName, true),
+                        Discord.BuildDiscordField("Time of Ban",
+                            DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
+                        Discord.BuildDiscordField("Reason of Ban", reason, true),
+                        Discord.BuildDiscordField("Ban duration", totalTime.ToString(), true)
+                    }));
         }
     }
 }

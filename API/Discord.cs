@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using Rocket.Core.Logging;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.API
 {
     public static class Discord
     {

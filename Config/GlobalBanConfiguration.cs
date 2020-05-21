@@ -1,6 +1,6 @@
 ﻿using Rocket.API;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.Config
 {
     public class GlobalBanConfiguration : IRocketPluginConfiguration
     {
@@ -16,6 +16,7 @@ namespace fr34kyn01535.GlobalBan
         public int DiscordBanWebhookColor;
         public string DiscordUnbanWebhook;
         public int DiscordUnbanWebhookColor;
+        public bool BanCommandAlsoIpAndHwidBans;
 
         public void LoadDefaults()
         {
@@ -31,6 +32,7 @@ namespace fr34kyn01535.GlobalBan
             DiscordBanWebhookColor = 16711680;
             DiscordUnbanWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
             DiscordUnbanWebhookColor = 65280;
+            BanCommandAlsoIpAndHwidBans = true;
         }
     }
 }

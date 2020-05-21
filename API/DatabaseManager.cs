@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text.RegularExpressions;
 using I18N.West;
+using JetBrains.Annotations;
 using MySql.Data.MySqlClient;
 using Rocket.Core.Logging;
 using SDG.Unturned;
 
-namespace fr34kyn01535.GlobalBan
+namespace fr34kyn01535.GlobalBan.API
 {
     public class DatabaseManager
     {
@@ -16,6 +18,7 @@ namespace fr34kyn01535.GlobalBan
             CheckSchema();
         }
 
+        [CanBeNull]
         private MySqlConnection CreateConnection()
         {
             MySqlConnection connection = null;
@@ -65,6 +68,7 @@ namespace fr34kyn01535.GlobalBan
             public string Reason;
         }
 
+        [CanBeNull]
         public Ban GetBan(uint ip)
         {
             try
@@ -100,6 +104,7 @@ namespace fr34kyn01535.GlobalBan
             return null;
         }
 
+        [CanBeNull]
         public Ban GetHwidBan(string hwid)
         {
             try
@@ -135,6 +140,7 @@ namespace fr34kyn01535.GlobalBan
             return null;
         }
 
+        [CanBeNull]
         public Ban GetBan(string steamId)
         {
             try
@@ -170,6 +176,43 @@ namespace fr34kyn01535.GlobalBan
             return null;
         }
 
+        [NotNull]
+        public List<Ban> GetBans(string steamId)
+        {
+            var output = new List<Ban>();
+            try
+            {
+                var connection = CreateConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = "select  `banDuration`,`banTime`,`admin`, `banMessage` from `" +
+                                      GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
+                                      "` where `steamId` = '" + steamId +
+                                      "';";
+                connection.Open();
+                var result = command.ExecuteReader(CommandBehavior.SingleRow);
+                if (result?.Read() == true && result.HasRows)
+                    output.Add(new Ban
+                    {
+                        Duration = result["banDuration"] == DBNull.Value ? -1 : result.GetInt32("banDuration"),
+                        Time = (DateTime) result["banTime"],
+                        Admin = result["admin"] == DBNull.Value ||
+                                result["admin"].ToString() == "Rocket.API.ConsolePlayer"
+                            ? "Console"
+                            : (string) result["admin"],
+                        Reason =
+                            result["banMessage"] == DBNull.Value ? "Rule Breaking" : result.GetString("banMessage")
+                    });
+
+                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+
+            return output;
+        }
+
         public void CheckSchema()
         {
             try
@@ -185,7 +228,7 @@ namespace fr34kyn01535.GlobalBan
                 {
                     command.CommandText = "CREATE TABLE `" +
                                           GlobalBan.Instance.Configuration.Instance.DatabaseTableName +
-                                          "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(128) NOT NULL,`ip` INT UNSIGNED NOT NULL,`hwid` VARCHAR(128),`admin` varchar(128) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` int NULL, `server` VARCHAR(50) DEFAULT 'Unturned Server',`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
+                                          "` (`id` int(11) NOT NULL AUTO_INCREMENT,`steamId` varchar(128) NOT NULL,`ip` INT UNSIGNED NOT NULL,`hwid` VARCHAR(128),`admin` varchar(128) NOT NULL,`banMessage` varchar(512) DEFAULT NULL,`charactername` varchar(255) DEFAULT NULL,`banDuration` INT UNSIGNED NULL, `server` VARCHAR(50) DEFAULT 'Unturned Server',`banTime` timestamp NULL ON UPDATE CURRENT_TIMESTAMP,PRIMARY KEY (`id`));";
                     command.ExecuteNonQuery();
                 }
 
@@ -198,7 +241,7 @@ namespace fr34kyn01535.GlobalBan
         }
 
         public void BanPlayer(string characterName, string steamId, uint ip, string hwid, string admin,
-            string banMessage, int duration)
+            string banMessage, uint duration)
         {
             try
             {
@@ -237,6 +280,7 @@ namespace fr34kyn01535.GlobalBan
             public string Name;
         }
 
+        [CanBeNull]
         public UnbanResult UnbanPlayer(string player)
         {
             UnbanResult result = null;

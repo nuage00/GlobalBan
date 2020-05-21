@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using fr34kyn01535.GlobalBan.API;
+using JetBrains.Annotations;
 using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
@@ -10,19 +12,19 @@ namespace fr34kyn01535.GlobalBan.Commands
 {
     public class CommandKick : IRocketCommand
     {
-        public string Help => "Kicks a player";
+        [NotNull] public string Help => "Kicks a player";
 
-        public string Name => "kick";
+        [NotNull] public string Name => "kick";
 
-        public string Syntax => "<player> [reason]";
+        [NotNull] public string Syntax => "<player> [reason]";
 
-        public List<string> Aliases => new List<string>();
+        [NotNull] public List<string> Aliases => new List<string>();
 
         public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
-        public List<string> Permissions => new List<string> {"globalban.kick"};
+        [NotNull] public List<string> Permissions => new List<string> {"globalban.kick"};
 
-        public void Execute(IRocketPlayer caller, params string[] command)
+        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
             if (command.Length == 0 || command.Length > 2)
             {
