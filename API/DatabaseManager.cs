@@ -118,7 +118,7 @@ namespace fr34kyn01535.GlobalBan.API
         private static PlayerBan BuildBanData([NotNull] Row row)
         {
             return new PlayerBan(ulong.Parse(row["id"].ToString()), ulong.Parse(row["steamId"].ToString()),
-                row["hwid"].ToString(), uint.Parse(row["ip"].ToString()), uint.Parse(row["banDuration"].ToString()),
+                row["hwid"].ToString(), uint.Parse(row["ip"].ToString()), uint.TryParse(row["banDuration"].ToString(), out var duration) ? duration : uint.MaxValue,
                 (DateTime) row["banTime"], ulong.Parse(row["adminId"].ToString()), row["banMessage"].ToString(),
                 ushort.Parse(row["serverId"].ToString()), bool.Parse(row["unbanned"].ToString()));
         }

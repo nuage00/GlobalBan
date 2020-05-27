@@ -66,7 +66,7 @@ namespace fr34kyn01535.GlobalBan
                 BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
             else
                 RemovePlayerWithBan(playerId,
-                    idBan.Duration == -1
+                    idBan.Duration == uint.MaxValue
                         ? uint.MaxValue
                         : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
                     idBan.Reason);
@@ -99,7 +99,7 @@ namespace fr34kyn01535.GlobalBan
                 BanEvading(characterName, playerId, playerIp, playerHwid);
             else
                 RemovePlayerWithBan(playerId,
-                    idBan.Duration == -1
+                    idBan.Duration == uint.MaxValue
                         ? uint.MaxValue
                         : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
                     idBan.Reason);
