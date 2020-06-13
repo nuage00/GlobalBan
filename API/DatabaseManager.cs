@@ -104,7 +104,7 @@ namespace fr34kyn01535.GlobalBan.API
         {
             RequestQueryExecute(false,
                 new Query(
-                    $"INSERT INTO `{Configuration.DatabaseTableName}` (`steamId`,`ip,`hwid`,`adminId`,`banMessage`,`banDuration`,`serverId`,`banTime`) VALUES(@playerId,@ip,@hwid,@admin,@banMessage,@banDuration,@serverId,now())",
+                    $"INSERT INTO `{Configuration.DatabaseTableName}` (`steamId`,`ip`,`hwid`,`adminId`,`banMessage`,`banDuration`,`serverId`,`banTime`) VALUES(@playerId,@ip,@hwid,@admin,@banMessage,@banDuration,@serverId,now())",
                     EQueryType.NonQuery, null, false, new MySqlParameter("@playerId", steamId),
                     new MySqlParameter("@ip", ip), new MySqlParameter("@hwid", hwid),
                     new MySqlParameter("@admin", admin),
