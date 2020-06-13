@@ -19,7 +19,8 @@ namespace fr34kyn01535.GlobalBan.API
         {
         }
 
-        public PlayerBan(ulong entryId, ulong steamId, string hwid, uint ip, uint duration, DateTime banTime, ulong admin, string reason, ushort serverId, bool unban)
+        public PlayerBan(ulong entryId, ulong steamId, string hwid, uint ip, uint duration, DateTime banTime,
+            ulong admin, string reason, ushort serverId, bool unban)
         {
             BanEntryId = entryId;
             SteamId = steamId;

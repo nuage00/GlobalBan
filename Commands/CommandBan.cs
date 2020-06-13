@@ -27,7 +27,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
         [NotNull] public List<string> Permissions => new List<string> {"globalban.ban"};
 
-        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public async void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
             if (command.Length == 0)
             {
@@ -47,7 +47,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                 return;
             }
 
-            var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
+            var pData = await PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
 
             var totalTime = args.GetUInt(out index);
             if (index > -1)

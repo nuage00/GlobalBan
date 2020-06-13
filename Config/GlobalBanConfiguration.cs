@@ -13,6 +13,7 @@ namespace fr34kyn01535.GlobalBan.Config
         public ushort DatabasePort { get; set; }
         public bool UseCache { get; set; }
         public ulong CacheRefreshIntervalMilliseconds { get; set; }
+        public byte CacheSize { get; set; }
 
         public string DiscordKickWebhook;
         public int DiscordKickWebhookColor;
@@ -32,6 +33,7 @@ namespace fr34kyn01535.GlobalBan.Config
             DatabasePort = 3306;
             UseCache = true;
             CacheRefreshIntervalMilliseconds = 30000;
+            CacheSize = 24;
             DiscordKickWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
             DiscordKickWebhookColor = 16776960;
             DiscordBanWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";

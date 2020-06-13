@@ -17,7 +17,8 @@ namespace fr34kyn01535.GlobalBan.API
             {
                 var element = list[index];
                 var elementNoSuffix = element.Substring(0, element.Length - suffix.Length);
-                if (element.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) && ushort.TryParse(elementNoSuffix, out var output))
+                if (element.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) &&
+                    ushort.TryParse(elementNoSuffix, out var output))
                     return output;
             }
 

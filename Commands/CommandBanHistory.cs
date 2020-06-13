@@ -23,7 +23,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
         [NotNull] public List<string> Permissions => new List<string> {"globalban.banhistory"};
 
-        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public async void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
             if (command.Length == 0)
             {
@@ -43,8 +43,8 @@ namespace fr34kyn01535.GlobalBan.Commands
                 return;
             }
 
-            var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
-            var allBans = GlobalBan.Instance.database.GetBans(ulong.Parse(target.Id));
+            var pData = await PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
+            var allBans = await GlobalBan.Instance.database.GetBans(ulong.Parse(target.Id));
 
             UnturnedChat.Say(caller,
                 GlobalBan.Instance.Translate("ban_history", pData?.CharacterName ?? target.DisplayName, allBans.Count,

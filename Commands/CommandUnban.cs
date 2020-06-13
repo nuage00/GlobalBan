@@ -25,7 +25,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
         [NotNull] public List<string> Permissions => new List<string> {"globalban.unban"};
 
-        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public async void Execute(IRocketPlayer caller, [NotNull] params string[] command)
         {
             if (command.Length == 0)
             {
@@ -44,9 +44,9 @@ namespace fr34kyn01535.GlobalBan.Commands
                 return;
             }
 
-            var pData = PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
+            var pData = await PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
 
-            if (!GlobalBan.Instance.database.TryUnban(ulong.Parse(target.Id)))
+            if (!await GlobalBan.Instance.database.TryUnban(ulong.Parse(target.Id)))
             {
                 UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
                 return;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading.Tasks;
 using fr34kyn01535.GlobalBan.API;
 using fr34kyn01535.GlobalBan.Config;
 using JetBrains.Annotations;
@@ -52,13 +53,18 @@ namespace fr34kyn01535.GlobalBan
 
         private void RocketServerEvents_OnPlayerConnected([NotNull] UnturnedPlayer player)
         {
+            OnJoin(player);
+        }
+
+        private async Task OnJoin([NotNull] UnturnedPlayer player)
+        {
             var playerId = player.CSteamID;
             var playerIp = playerId.GetIp();
             var playerHwid = string.Join("", player.SteamPlayer().playerID.hwid);
 
-            var idBan = database.GetValidBan(playerId.m_SteamID);
-            var ipBan = database.IsBanned(playerIp);
-            var hwidBan = database.IsBanned(playerHwid);
+            var idBan = await database.GetValidBan(playerId.m_SteamID);
+            var ipBan = await database.IsBanned(playerIp);
+            var hwidBan = await database.IsBanned(playerHwid);
 
             if (idBan == null && !ipBan && !hwidBan) return;
 
@@ -74,8 +80,12 @@ namespace fr34kyn01535.GlobalBan
 
         private void Events_OnJoinRequested(ValidateAuthTicketResponse_t callback, ref bool isValid)
         {
-            var playerId = callback.m_SteamID;
-            var pData = PlayerInfoLib.Instance.database.QueryById(playerId);
+            OnJoinRequested(callback.m_SteamID);
+        }
+
+        private async Task OnJoinRequested(CSteamID playerId)
+        {
+            var pData = await PlayerInfoLib.Instance.database.QueryById(playerId);
             var characterName = playerId.ToString();
             var playerIp = uint.MaxValue;
             var playerHwid = "";
@@ -87,13 +97,11 @@ namespace fr34kyn01535.GlobalBan
                 playerHwid = pData.Hwid;
             }
 
-            var idBan = database.GetValidBan(playerId.m_SteamID);
-            var ipBan = database.IsBanned(playerIp);
-            var hwidBan = database.IsBanned(playerHwid);
+            var idBan = await database.GetValidBan(playerId.m_SteamID);
+            var ipBan = await database.IsBanned(playerIp);
+            var hwidBan = await database.IsBanned(playerHwid);
 
             if (idBan == null && !ipBan && !hwidBan) return;
-
-            isValid = false;
 
             if (ipBan || hwidBan)
                 BanEvading(characterName, playerId, playerIp, playerHwid);

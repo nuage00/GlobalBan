@@ -86,8 +86,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libraries\PlayerInfoLib.dll</HintPath>
     </Reference>
-    <Reference Include="Pustalorc.Libraries.MySqlConnectorWrapper, Version=2.0.3.0, Culture=neutral, PublicKeyToken=null">
-      <Private>False</Private>
+    <Reference Include="Pustalorc.Libraries.MySqlConnectorWrapper, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libraries\Pustalorc.Libraries.MySqlConnectorWrapper.dll</HintPath>
     </Reference>
     <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
