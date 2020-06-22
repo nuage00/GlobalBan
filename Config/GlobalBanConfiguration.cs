@@ -22,6 +22,8 @@ namespace fr34kyn01535.GlobalBan.Config
         public string DiscordUnbanWebhook;
         public int DiscordUnbanWebhookColor;
         public bool BanCommandAlsoIpAndHwidBans;
+        public string WebhookDisplayName;
+        public string WebhookImageURL;
 
         public void LoadDefaults()
         {
@@ -33,7 +35,7 @@ namespace fr34kyn01535.GlobalBan.Config
             DatabasePort = 3306;
             UseCache = true;
             CacheRefreshIntervalMilliseconds = 30000;
-            CacheSize = 24;
+            CacheSize = 48;
             DiscordKickWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
             DiscordKickWebhookColor = 16776960;
             DiscordBanWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
@@ -41,6 +43,8 @@ namespace fr34kyn01535.GlobalBan.Config
             DiscordUnbanWebhook = "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY";
             DiscordUnbanWebhookColor = 65280;
             BanCommandAlsoIpAndHwidBans = true;
+            WebhookDisplayName = "Global Ban";
+            WebhookImageURL = "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png";
         }
     }
 }

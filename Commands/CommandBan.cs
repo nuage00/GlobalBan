@@ -103,8 +103,8 @@ namespace fr34kyn01535.GlobalBan.Commands
             Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
                 Discord.BuildDiscordEmbed("A player was banned from the server.",
                     $"{characterName} was banned from the server for {reason}!",
-                    "Global Ban",
-                    "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                    GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
+                    GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
                     GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
                     new[]
                     {

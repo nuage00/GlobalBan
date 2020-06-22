@@ -26,13 +26,11 @@ namespace fr34kyn01535.GlobalBan
         {
             Instance = this;
             database = new DatabaseManager(Configuration.Instance);
-            Provider.onCheckValid += Events_OnJoinRequested;
             U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
         }
 
         protected override void Unload()
         {
-            Provider.onCheckValid -= Events_OnJoinRequested;
             U.Events.OnPlayerConnected -= RocketServerEvents_OnPlayerConnected;
         }
 
@@ -68,49 +66,14 @@ namespace fr34kyn01535.GlobalBan
 
             if (idBan == null && !ipBan && !hwidBan) return;
 
-            if (ipBan || hwidBan)
+            if (idBan != null)
+                RemovePlayerWithBan(playerId,
+                    idBan.Duration == uint.MaxValue
+                        ? uint.MaxValue
+                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
+                    idBan.Reason);
+            else
                 BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
-            else
-                RemovePlayerWithBan(playerId,
-                    idBan.Duration == uint.MaxValue
-                        ? uint.MaxValue
-                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
-                    idBan.Reason);
-        }
-
-        private void Events_OnJoinRequested(ValidateAuthTicketResponse_t callback, ref bool isValid)
-        {
-            OnJoinRequested(callback.m_SteamID);
-        }
-
-        private async Task OnJoinRequested(CSteamID playerId)
-        {
-            var pData = await PlayerInfoLib.Instance.database.QueryById(playerId);
-            var characterName = playerId.ToString();
-            var playerIp = uint.MaxValue;
-            var playerHwid = "";
-
-            if (pData != null)
-            {
-                characterName = pData.CharacterName;
-                playerIp = pData.Ip;
-                playerHwid = pData.Hwid;
-            }
-
-            var idBan = await database.GetValidBan(playerId.m_SteamID);
-            var ipBan = await database.IsBanned(playerIp);
-            var hwidBan = await database.IsBanned(playerHwid);
-
-            if (idBan == null && !ipBan && !hwidBan) return;
-
-            if (ipBan || hwidBan)
-                BanEvading(characterName, playerId, playerIp, playerHwid);
-            else
-                RemovePlayerWithBan(playerId,
-                    idBan.Duration == uint.MaxValue
-                        ? uint.MaxValue
-                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
-                    idBan.Reason);
         }
 
         private void BanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
@@ -129,9 +92,9 @@ namespace fr34kyn01535.GlobalBan
         {
             Discord.SendWebhookPost(Configuration.Instance.DiscordBanWebhook,
                 Discord.BuildDiscordEmbed("A player was banned from the server.",
-                    $"{playerName} was banned from the server for {reason}!", "Global Ban",
-                    "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
-                    Configuration.Instance.DiscordBanWebhookColor, new[]
+                    $"{playerName} was banned from the server for {reason}!", Configuration.Instance.WebhookDisplayName,
+                    Configuration.Instance.WebhookImageURL, Configuration.Instance.DiscordBanWebhookColor,
+                    new[]
                     {
                         Discord.BuildDiscordField("Steam64ID", playerId, true),
                         Discord.BuildDiscordField("Time of Ban", DateTime.Now.ToString(CultureInfo.InvariantCulture),

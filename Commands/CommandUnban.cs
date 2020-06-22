@@ -57,15 +57,16 @@ namespace fr34kyn01535.GlobalBan.Commands
             UnturnedChat.Say("The player " + characterName + " was unbanned");
             Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhook,
                 Discord.BuildDiscordEmbed("A player was unbanned from the server.",
-                    $"{characterName} was unbanned from the server.", "Global Ban",
-                    "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                    $"{characterName} was unbanned from the server.",
+                    GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
+                    GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
                     GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
                     new[]
                     {
                         Discord.BuildDiscordField("Steam64ID", target.Id, true),
                         Discord.BuildDiscordField("Unbanned By", caller.DisplayName, true),
-                        Discord.BuildDiscordField("Time of Unban",
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture), false)
+                        Discord.BuildDiscordField("Time of Unban", DateTime.Now.ToString(CultureInfo.InvariantCulture),
+                            false)
                     }));
         }
     }

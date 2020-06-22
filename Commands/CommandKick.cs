@@ -47,8 +47,9 @@ namespace fr34kyn01535.GlobalBan.Commands
 
                 Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordKickWebhook,
                     Discord.BuildDiscordEmbed("A player was kicked from the server.",
-                        $"{playerToKick.CharacterName} was kicked from the server for {command[1]}!", "Global Ban",
-                        "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                        $"{playerToKick.CharacterName} was kicked from the server for {command[1]}!",
+                        GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
+                        GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
                         GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
                         new[]
                         {
@@ -68,8 +69,8 @@ namespace fr34kyn01535.GlobalBan.Commands
                 Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordKickWebhook,
                     Discord.BuildDiscordEmbed("A player was kicked from the server.",
                         $"{playerToKick.CharacterName} was kicked from the server for {GlobalBan.Instance.Translate("command_kick_private_default_reason")}!",
-                        "Global Ban",
-                        "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png",
+                        GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
+                        GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
                         GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
                         new[]
                         {
