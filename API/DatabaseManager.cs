@@ -21,9 +21,8 @@ namespace fr34kyn01535.GlobalBan.API
         private Dictionary<Query, Query> CreateTableQueries => _createTableQueries ??= new Dictionary<Query, Query>
         {
             {
-                new Query(null, $"SHOW TABLES LIKE '{Configuration.DatabaseTableName}';", EQueryType.Scalar),
-                new Query(null,
-                    $"CREATE TABLE `{Configuration.DatabaseTableName}` (`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, `steamId` BIGINT UNSIGNED NOT NULL, `ip` INT UNSIGNED NOT NULL, `hwid` VARCHAR(255) NOT NULL DEFAULT '', `adminId` BIGINT UNSIGNED NOT NULL DEFAULT 0, `banMessage` VARCHAR(512) NOT NULL DEFAULT 'N/A', `banDuration` INT UNSIGNED, `serverId` SMALLINT UNSIGNED, `banTime` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, `unbanned` BOOLEAN NOT NULL DEFAULT FALSE, PRIMARY KEY (`id`));",
+                new Query($"SHOW TABLES LIKE '{Configuration.DatabaseTableName}';", EQueryType.Scalar),
+                new Query($"CREATE TABLE `{Configuration.DatabaseTableName}` (`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, `steamId` BIGINT UNSIGNED NOT NULL, `ip` INT UNSIGNED NOT NULL, `hwid` VARCHAR(255) NOT NULL DEFAULT '', `adminId` BIGINT UNSIGNED NOT NULL DEFAULT 0, `banMessage` VARCHAR(512) NOT NULL DEFAULT 'N/A', `banDuration` INT UNSIGNED, `serverId` SMALLINT UNSIGNED, `banTime` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, `unbanned` BOOLEAN NOT NULL DEFAULT FALSE, PRIMARY KEY (`id`));",
                     EQueryType.NonQuery)
             }
         };
@@ -47,10 +46,9 @@ namespace fr34kyn01535.GlobalBan.API
             if (ip == uint.MaxValue)
                 return false;
 
-            var queryOutput = await ExecuteQueryAsync(new Query(ip,
-                "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `ip`=@ip;",
-                EQueryType.Reader, null, true, new MySqlParameter("@ip", ip)));
+            var queryOutput = await ExecuteQueryAsync(new Query(
+                $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `ip`=@ip;",
+                EQueryType.Reader, null, false, new MySqlParameter("@ip", ip)));
 
             if (!(queryOutput.Output is List<Row> rows) || rows.Count == 0)
                 return false;
@@ -64,10 +62,9 @@ namespace fr34kyn01535.GlobalBan.API
             if (string.IsNullOrEmpty(hwid))
                 return false;
 
-            var queryOutput = await ExecuteQueryAsync(new Query(hwid,
-                "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `hwid`=@hwid;",
-                EQueryType.Reader, null, true, new MySqlParameter("@hwid", hwid)));
+            var queryOutput = await ExecuteQueryAsync(new Query(
+                $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `hwid`=@hwid;",
+                EQueryType.Reader, null, false, new MySqlParameter("@hwid", hwid)));
 
             if (!(queryOutput.Output is List<Row> rows) || rows.Count == 0)
                 return false;
@@ -88,9 +85,8 @@ namespace fr34kyn01535.GlobalBan.API
 
         public async Task<List<PlayerBan>> GetBans(ulong id)
         {
-            var queryOutput = await ExecuteQueryAsync(new Query(id,
-                "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;",
+            var queryOutput = await ExecuteQueryAsync(new Query(
+                $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;",
                 EQueryType.Reader, null, true, new MySqlParameter("@id", id)));
 
             if (!(queryOutput.Output is List<Row> rows) || rows.Count == 0)
@@ -99,27 +95,17 @@ namespace fr34kyn01535.GlobalBan.API
             return rows.Select(BuildBanData).ToList();
         }
 
-        public void BanPlayer(ulong steamId, uint ip, string hwid, ulong admin, [CanBeNull] string banMessage,
-            uint duration)
+        public void BanPlayer(ulong steamId, uint ip, string hwid, ulong admin, [CanBeNull] string banMessage, uint duration)
         {
             RequestQueryExecute(false,
-                new Query(null,
+                new Query(
                     $"INSERT INTO `{Configuration.DatabaseTableName}` (`steamId`,`ip`,`hwid`,`adminId`,`banMessage`,`banDuration`,`serverId`,`banTime`) VALUES(@playerId,@ip,@hwid,@admin,@banMessage,@banDuration,@serverId,now())",
-                    EQueryType.NonQuery, o => ExecuteTransaction(
-                        new Query(steamId,
-                            "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                            $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;",
-                            EQueryType.Reader, null, true, new MySqlParameter("@id", steamId)),
-                        new Query(ip,
-                            "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                            $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `ip`=@ip;",
-                            EQueryType.Reader, null, true, new MySqlParameter("@ip", ip)),
-                        new Query(hwid,
-                            "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                            $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `hwid`=@hwid;",
-                            EQueryType.Reader, null, true, new MySqlParameter("@hwid", hwid))), false, new MySqlParameter("@playerId", steamId),
-                    new MySqlParameter("@ip", ip), new MySqlParameter("@hwid", hwid),
-                    new MySqlParameter("@admin", admin),
+                    EQueryType.NonQuery,
+                    o => ExecuteTransaction(new Query(
+                        $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;",
+                        EQueryType.Reader, null, true, new MySqlParameter("@id", steamId))), false,
+                    new MySqlParameter("@playerId", steamId), new MySqlParameter("@ip", ip),
+                    new MySqlParameter("@hwid", hwid), new MySqlParameter("@admin", admin),
                     new MySqlParameter("@banMessage", string.IsNullOrEmpty(banMessage) ? "N/A" : banMessage),
                     duration == 0
                         ? new MySqlParameter("@banDuration", DBNull.Value)
@@ -134,15 +120,12 @@ namespace fr34kyn01535.GlobalBan.API
                 return false;
 
             var queries = bans.Select(ban =>
-                new Query(null,
-                    $"UPDATE `{Configuration.DatabaseTableName}` SET `unbanned`=TRUE WHERE `id`={ban.BanEntryId}",
-                    EQueryType.NonQuery)).ToList();
+                new Query($"UPDATE `{Configuration.DatabaseTableName}` SET `unbanned`=TRUE WHERE `id`={ban.BanEntryId}", EQueryType.NonQuery)).ToList();
 
-            queries.Add(new Query(null, "SHOW TABLES LIKE '{Configuration.DatabaseTableName}';", EQueryType.NonQuery,
-                output => ExecuteTransaction(new Query(id,
-                    "SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, " +
-                    $"t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;", EQueryType.Reader,
-                    null, true, new MySqlParameter("@id", id)))));
+            queries.Add(new Query("SHOW TABLES LIKE '{Configuration.DatabaseTableName}';", EQueryType.NonQuery,
+                output => ExecuteTransaction(new Query(
+                    $"SELECT t1.id, t1.steamId, t1.hwid, t1.ip, t1.adminId, t1.banMessage, t1.banDuration, t1.serverId, t1.banTime, t1.unbanned FROM `{Configuration.DatabaseTableName}` as t1 WHERE `id`=@id;",
+                    EQueryType.Reader, null, true, new MySqlParameter("@id", id)))));
 
             RequestQueryExecute(true, queries.ToArray());
             return true;
