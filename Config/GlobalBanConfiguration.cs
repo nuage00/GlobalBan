@@ -23,7 +23,7 @@ namespace fr34kyn01535.GlobalBan.Config
         public int DiscordUnbanWebhookColor;
         public bool BanCommandAlsoIpAndHwidBans;
         public string WebhookDisplayName;
-        public string WebhookImageURL;
+        public string WebhookImageUrl;
 
         public void LoadDefaults()
         {
@@ -44,7 +44,7 @@ namespace fr34kyn01535.GlobalBan.Config
             DiscordUnbanWebhookColor = 65280;
             BanCommandAlsoIpAndHwidBans = true;
             WebhookDisplayName = "Global Ban";
-            WebhookImageURL = "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png";
+            WebhookImageUrl = "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png";
         }
     }
 }

@@ -49,7 +49,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                     Discord.BuildDiscordEmbed("A player was kicked from the server.",
                         $"{playerToKick.CharacterName} was kicked from the server for {command[1]}!",
                         GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                        GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
+                        GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
                         GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
                         new[]
                         {
@@ -70,7 +70,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                     Discord.BuildDiscordEmbed("A player was kicked from the server.",
                         $"{playerToKick.CharacterName} was kicked from the server for {GlobalBan.Instance.Translate("command_kick_private_default_reason")}!",
                         GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                        GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
+                        GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
                         GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
                         new[]
                         {

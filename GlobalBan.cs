@@ -93,7 +93,7 @@ namespace fr34kyn01535.GlobalBan
             Discord.SendWebhookPost(Configuration.Instance.DiscordBanWebhook,
                 Discord.BuildDiscordEmbed("A player was banned from the server.",
                     $"{playerName} was banned from the server for {reason}!", Configuration.Instance.WebhookDisplayName,
-                    Configuration.Instance.WebhookImageURL, Configuration.Instance.DiscordBanWebhookColor,
+                    Configuration.Instance.WebhookImageUrl, Configuration.Instance.DiscordBanWebhookColor,
                     new[]
                     {
                         Discord.BuildDiscordField("Steam64ID", playerId, true),

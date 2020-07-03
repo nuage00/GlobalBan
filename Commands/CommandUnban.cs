@@ -59,7 +59,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                 Discord.BuildDiscordEmbed("A player was unbanned from the server.",
                     $"{characterName} was unbanned from the server.",
                     GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                    GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
+                    GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
                     GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
                     new[]
                     {

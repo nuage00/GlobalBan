@@ -72,7 +72,7 @@ namespace fr34kyn01535.GlobalBan.Commands
                 Discord.BuildDiscordEmbed("A player was banned from the server.",
                     $"{characterName} was banned from the server for {reason}!",
                     GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                    GlobalBan.Instance.Configuration.Instance.WebhookImageURL,
+                    GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
                     GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
                     new[]
                     {
