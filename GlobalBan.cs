@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using fr34kyn01535.GlobalBan.API;
@@ -16,6 +18,7 @@ using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
+using UnityEngine;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -106,13 +109,24 @@ namespace fr34kyn01535.GlobalBan
                     }));
         }
 
-        public static void RemovePlayerWithBan(CSteamID playerId, uint timeRemaining, [NotNull] string reason)
+        public void RemovePlayerWithBan(CSteamID playerId, uint timeRemaining, [NotNull] string reason)
         {
             var bytes = new List<byte> {9, (byte) reason.Length};
             bytes.AddRange(Encoding.UTF8.GetBytes(reason));
             bytes.AddRange(BitConverter.GetBytes(timeRemaining));
             Provider.send(playerId, ESteamPacket.BANNED, bytes.ToArray(), bytes.Count, 0);
             SteamGameServer.EndAuthSession(playerId);
+
+            StartCoroutine(DismissBanned(playerId, 2));
+        }
+
+        private IEnumerator DismissBanned(CSteamID playerId, float delayTime)
+        {
+            yield return new WaitForSeconds(delayTime);
+
+            Provider.dismiss(playerId);
+
+            yield return null;
         }
     }
 }
