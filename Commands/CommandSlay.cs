@@ -62,8 +62,14 @@ namespace fr34kyn01535.GlobalBan.Commands
                 ? string.Join("", pData.Hwid)
                 : string.Join("", target is UnturnedPlayer tPlayer ? tPlayer.SteamPlayer().playerID.hwid : new byte[0]);
 
-            GlobalBan.Instance.database.BanPlayer(steamId.m_SteamID, ip, hwid, adminId, reason,
-                uint.MaxValue);
+            var isBanned = await GlobalBan.Instance.database.BanPlayer(steamId.m_SteamID, ip, hwid, adminId, reason, uint.MaxValue);
+
+            if (!isBanned)
+            {
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_ban_fail"));
+                return;
+            }
+
             UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, reason));
             if (target is UnturnedPlayer)
                 Provider.ban(steamId, reason, uint.MaxValue);

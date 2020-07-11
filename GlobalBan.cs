@@ -2,8 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using fr34kyn01535.GlobalBan.API;
@@ -11,7 +9,6 @@ using fr34kyn01535.GlobalBan.Config;
 using JetBrains.Annotations;
 using PlayerInfoLibrary;
 using Rocket.API.Collections;
-using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned;
 using Rocket.Unturned.Chat;
@@ -19,6 +16,7 @@ using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace fr34kyn01535.GlobalBan
 {
@@ -51,7 +49,9 @@ namespace fr34kyn01535.GlobalBan
                 {"command_kick_public_reason", "The player {0} was kicked for: {1}"},
                 {"command_kick_public", "The player {0} was kicked"},
                 {"command_kick_private_default_reason", "you were kicked from the server"},
-                {"ban_history", "The player {0} has had {1} bans. Latest bans: {2}"}
+                {"ban_history", "The player {0} has had {1} bans. Latest bans: {2}"},
+                {"command_ban_fail", "The ban has failed, please contact an administrator so they can investigate." },
+                {"command_unban_fail", "The unban failed. Either this player isn't banned, or something horrible went wrong." }
             };
 
         private void RocketServerEvents_OnPlayerConnected([NotNull] UnturnedPlayer player)
@@ -78,18 +78,25 @@ namespace fr34kyn01535.GlobalBan
                         : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
                     idBan.Reason);
             else
-                BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
+                await BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
         }
 
-        private void BanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
+        private async Task BanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
         {
             const string banReason = "Ban Evading";
 
-            database.BanPlayer(playerId.m_SteamID, playerIp, playerHwid, 0, banReason, 0);
+            var success = await database.BanPlayer(playerId.m_SteamID, playerIp, playerHwid, 0, banReason, 0);
 
-            UnturnedChat.Say(Translate("command_ban_public", playerName));
+            if (!success)
+            {
+                Logger.Log("Something went wrong and the player didn't get banned. Please check for issues.");
+            }
+            else
+            {
+                UnturnedChat.Say(Translate("command_ban_public", playerName));
 
-            SendBanWebhook(playerName, banReason, playerId.ToString(), uint.MaxValue);
+                SendBanWebhook(playerName, banReason, playerId.ToString(), uint.MaxValue);
+            }
             RemovePlayerWithBan(playerId, uint.MaxValue, banReason);
         }
 

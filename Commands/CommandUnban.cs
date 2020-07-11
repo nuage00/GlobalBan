@@ -48,7 +48,7 @@ namespace fr34kyn01535.GlobalBan.Commands
 
             if (!await GlobalBan.Instance.database.TryUnban(ulong.Parse(target.Id)))
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
+                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("unban_fail"));
                 return;
             }
 
