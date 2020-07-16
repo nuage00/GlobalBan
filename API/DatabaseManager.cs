@@ -54,7 +54,7 @@ namespace fr34kyn01535.GlobalBan.API
                 return false;
 
             return rows.Select(BuildBanData).Any(k =>
-                k.Ip != uint.MaxValue && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Ip == ip);
+                k.Ip != uint.MaxValue && !k.Unbanned && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Ip == ip);
         }
 
         public async Task<bool> IsBanned([CanBeNull] string hwid)
@@ -70,7 +70,7 @@ namespace fr34kyn01535.GlobalBan.API
                 return false;
 
             return rows.Select(BuildBanData).Any(k =>
-                !string.IsNullOrEmpty(k.Hwid) && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Hwid == hwid);
+                !string.IsNullOrEmpty(k.Hwid) && !k.Unbanned && k.TimeOfBan.AddSeconds(k.Duration) > DateTime.Now && k.Hwid == hwid);
         }
 
         public async Task<PlayerBan> GetValidBan(ulong id)
