@@ -1,139 +1,41 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
-using fr34kyn01535.GlobalBan.API;
-using fr34kyn01535.GlobalBan.Config;
-using JetBrains.Annotations;
-using PlayerInfoLibrary;
-using Rocket.API.Collections;
-using Rocket.Core.Plugins;
-using Rocket.Unturned;
-using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
-using SDG.Unturned;
-using Steamworks;
-using UnityEngine;
-using Logger = Rocket.Core.Logging.Logger;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using OpenMod.Core.Plugins;
+using OpenMod.API.Plugins;
 
-namespace fr34kyn01535.GlobalBan
+[assembly: PluginMetadata("Pustalorc.GlobalBan", Author = "Pustalorc", DisplayName = "Global Ban", Website = "https://github.com/Pustalorc/GlobalBan/")]
+namespace MyOpenModPlugin
 {
-    public class GlobalBan : RocketPlugin<GlobalBanConfiguration>
+    public class MyOpenModPlugin : OpenModUniversalPlugin
     {
-        public static GlobalBan Instance;
-        public DatabaseManager database;
+        private readonly IConfiguration m_Configuration;
+        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly ILogger<MyOpenModPlugin> m_Logger;
 
-        protected override void Load()
+        public MyOpenModPlugin(
+            IConfiguration configuration, 
+            IStringLocalizer stringLocalizer,
+            ILogger<MyOpenModPlugin> logger, 
+            IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            Instance = this;
-            database = new DatabaseManager(Configuration.Instance);
-            U.Events.OnPlayerConnected += RocketServerEvents_OnPlayerConnected;
+            m_Configuration = configuration;
+            m_StringLocalizer = stringLocalizer;
+            m_Logger = logger;
         }
 
-        protected override void Unload()
+        protected override Task OnLoadAsync()
         {
-            U.Events.OnPlayerConnected -= RocketServerEvents_OnPlayerConnected;
+            m_Logger.LogInformation(m_StringLocalizer["plugin_events:plugin_start"]);
+            return Task.CompletedTask;
         }
 
-        [NotNull]
-        public override TranslationList DefaultTranslations =>
-            new TranslationList
-            {
-                {"command_generic_invalid_parameter", "Invalid parameter"},
-                {"command_generic_player_not_found", "Player not found"},
-                {"command_ban_public_reason", "The player {0} was banned for: {1}"},
-                {"command_ban_public", "The player {0} was banned"},
-                {"command_ban_private_default_reason", "you were banned from the server"},
-                {"command_kick_public_reason", "The player {0} was kicked for: {1}"},
-                {"command_kick_public", "The player {0} was kicked"},
-                {"command_kick_private_default_reason", "you were kicked from the server"},
-                {"ban_history", "The player {0} has had {1} bans. Latest bans: {2}"},
-                {"command_ban_fail", "The ban has failed, please contact an administrator so they can investigate." },
-                {"command_unban_fail", "The unban failed. Either this player isn't banned, or something horrible went wrong." }
-            };
-
-        private void RocketServerEvents_OnPlayerConnected([NotNull] UnturnedPlayer player)
+        protected override Task OnUnloadAsync()
         {
-            OnJoin(player);
-        }
-
-        private async Task OnJoin([NotNull] UnturnedPlayer player)
-        {
-            var playerId = player.CSteamID;
-            var playerIp = playerId.GetIp();
-            var playerHwid = string.Join("", player.SteamPlayer().playerID.hwid);
-
-            var idBan = await database.GetValidBan(playerId.m_SteamID);
-            var ipBan = await database.IsBanned(playerIp);
-            var hwidBan = await database.IsBanned(playerHwid);
-
-            if (idBan == null && !ipBan && !hwidBan) return;
-
-            if (idBan != null)
-                RemovePlayerWithBan(playerId,
-                    idBan.Duration == uint.MaxValue
-                        ? uint.MaxValue
-                        : (uint) idBan.TimeOfBan.AddSeconds(idBan.Duration).Subtract(DateTime.Now).TotalSeconds,
-                    idBan.Reason);
-            else
-                await BanEvading(player.CharacterName, playerId, playerIp, playerHwid);
-        }
-
-        private async Task BanEvading(string playerName, CSteamID playerId, uint playerIp, string playerHwid)
-        {
-            const string banReason = "Ban Evading";
-
-            var success = await database.BanPlayer(playerId.m_SteamID, playerIp, playerHwid, 0, banReason, 0);
-
-            if (!success)
-            {
-                Logger.Log("Something went wrong and the player didn't get banned. Please check for issues.");
-            }
-            else
-            {
-                UnturnedChat.Say(Translate("command_ban_public", playerName));
-
-                SendBanWebhook(playerName, banReason, playerId.ToString(), uint.MaxValue);
-            }
-            RemovePlayerWithBan(playerId, uint.MaxValue, banReason);
-        }
-
-        public void SendBanWebhook(string playerName, string reason, string playerId, uint duration)
-        {
-            Discord.SendWebhookPost(Configuration.Instance.DiscordBanWebhook,
-                Discord.BuildDiscordEmbed("A player was banned from the server.",
-                    $"{playerName} was banned from the server for {reason}!", Configuration.Instance.WebhookDisplayName,
-                    Configuration.Instance.WebhookImageUrl, Configuration.Instance.DiscordBanWebhookColor,
-                    new[]
-                    {
-                        Discord.BuildDiscordField("Steam64ID", playerId, true),
-                        Discord.BuildDiscordField("Time of Ban", DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                            true),
-                        Discord.BuildDiscordField("Reason of Ban", reason, false),
-                        Discord.BuildDiscordField("Ban duration", duration.ToString(), true)
-                    }));
-        }
-
-        public void RemovePlayerWithBan(CSteamID playerId, uint timeRemaining, [NotNull] string reason)
-        {
-            var bytes = new List<byte> {9, (byte) reason.Length};
-            bytes.AddRange(Encoding.UTF8.GetBytes(reason));
-            bytes.AddRange(BitConverter.GetBytes(timeRemaining));
-            Provider.send(playerId, ESteamPacket.BANNED, bytes.ToArray(), bytes.Count, 0);
-            SteamGameServer.EndAuthSession(playerId);
-
-            StartCoroutine(DismissBanned(playerId, 2));
-        }
-
-        private IEnumerator DismissBanned(CSteamID playerId, float delayTime)
-        {
-            yield return new WaitForSeconds(delayTime);
-
-            Provider.dismiss(playerId);
-
-            yield return null;
+            m_Logger.LogInformation(m_StringLocalizer["plugin_events:plugin_stop"]);
+            return Task.CompletedTask;
         }
     }
 }
