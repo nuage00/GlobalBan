@@ -128,7 +128,8 @@ namespace Pustalorc.GlobalBan.Commands
                 m_Logger.LogInformation(translated);
 
             if (m_Plugin.Instance != null)
-                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Ban, characterName, actor.DisplayName, reason, steamId.ToString(), duration);
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Ban, characterName, actor.DisplayName, reason,
+                    steamId.ToString(), duration);
         }
     }
 }

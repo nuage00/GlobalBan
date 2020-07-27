@@ -1,12 +1,4 @@
-﻿// ReSharper disable AnnotateCanBeNullParameter
-// ReSharper disable AnnotateNotNullParameter
-// ReSharper disable AnnotateCanBeNullTypeMember
-// ReSharper disable AnnotateNotNullTypeMember
-// ReSharper disable UnusedMember.Global
-// ReSharper disable UnusedMethodReturnValue.Global
-// ReSharper disable ReturnTypeCanBeEnumerable.Global
-
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore;
 using OpenMod.EntityFrameworkCore;
 using Pustalorc.GlobalBan.API.Classes;

@@ -10,7 +10,7 @@ namespace Pustalorc.GlobalBan.API.External
     public static class Discord
     {
         /// <summary>
-        ///     Sends a Rest.POST message to the specified url (Designed for discord URLs).
+        /// Sends a Rest.POST message to the specified url (Designed for discord URLs).
         /// </summary>
         /// <param name="url">The target URL to send the message to.</param>
         /// <param name="message">The message to be included in the Rest.POST query.</param>
@@ -28,7 +28,7 @@ namespace Pustalorc.GlobalBan.API.External
         }
 
         /// <summary>
-        ///     Sends a Rest.POST message to the specified url (Designed for discord URLs).
+        /// Sends a Rest.POST message to the specified url (Designed for discord URLs).
         /// </summary>
         /// <param name="url">The target URL to send the message to.</param>
         /// <param name="message">The message to be included in the Rest.POST query.</param>
@@ -46,7 +46,7 @@ namespace Pustalorc.GlobalBan.API.External
         }
 
         /// <summary>
-        ///     Builds a basic discord embed message.
+        /// Builds a basic discord embed message.
         /// </summary>
         /// <param name="title">The message for the embed.</param>
         /// <param name="description">The description to be shown in the embed.</param>
@@ -76,7 +76,7 @@ namespace Pustalorc.GlobalBan.API.External
         }
 
         /// <summary>
-        ///     Builds a basic EmbedField object
+        /// Builds a basic EmbedField object
         /// </summary>
         /// <param name="name">The name of the field.</param>
         /// <param name="text">The main text of the field.</param>

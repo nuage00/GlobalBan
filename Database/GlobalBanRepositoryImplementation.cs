@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ReSharper disable AnnotateNotNullParameter
+// ReSharper disable AnnotateNotNullTypeMember
+// ReSharper disable AnnotateCanBeNullParameter
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,9 +25,6 @@ namespace Pustalorc.GlobalBan.Database
         {
             m_DbContext = dbContext;
         }
-
-
-        #region Get & Find Bans
 
         public async Task<List<PlayerBan>> FindBansAsync(string searchTerm, BanSearchMode searchMode)
         {
@@ -134,10 +135,6 @@ namespace Pustalorc.GlobalBan.Database
             return GetBansByHwid(searchTerm).Where(k => !k.IsUnbanned);
         }
 
-        #endregion
-
-        #region Check Ban Status
-
         public async Task<BanType> CheckBanAsync(ulong steamId, uint ip = 0, string hwid = null)
         {
             var validIdBans = await GetBansInEffectById(steamId.ToString()).ToListAsync();
@@ -166,10 +163,6 @@ namespace Pustalorc.GlobalBan.Database
 
             return hwidBans.Count > 0 ? BanType.Hwid : BanType.None;
         }
-
-        #endregion
-
-        #region Ban & Unban targets
 
         public async Task<PlayerBan> BanPlayerAsync(int serverId, ulong playerId, uint ip, string hwid, uint duration,
             ulong adminId, string reason)
@@ -240,9 +233,6 @@ namespace Pustalorc.GlobalBan.Database
             foreach (var ban in bans)
                 ban.IsUnbanned = true;
         }
-
-        #endregion
-
 
         public async Task<int> SaveChangesAsync()
         {

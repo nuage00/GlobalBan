@@ -1,4 +1,5 @@
 ﻿// ReSharper disable AnnotateNotNullParameter
+// ReSharper disable AnnotateNotNullTypeMember
 
 using System;
 using System.Globalization;

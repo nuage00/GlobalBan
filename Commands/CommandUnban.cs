@@ -77,7 +77,8 @@ namespace Pustalorc.GlobalBan.Commands
             await actor.PrintMessageAsync(translated);
 
             if (m_Plugin.Instance != null)
-                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Unban, charName, actor.DisplayName, "", playerId.ToString(), 0);
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Unban, charName, actor.DisplayName, "",
+                    playerId.ToString(), 0);
         }
     }
 }

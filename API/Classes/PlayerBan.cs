@@ -1,7 +1,4 @@
-﻿// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
-// ReSharper disable UnusedMember.Global
-
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

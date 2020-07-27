@@ -46,7 +46,8 @@ namespace Pustalorc.GlobalBan.Commands
             {
                 var totalBans = await m_DbContext.PlayerBans.CountAsync();
                 var inEffect = await m_DbContext.PlayerBans.Where(k => !k.IsUnbanned).ToListAsync();
-                var totalBansInEffect = inEffect.Count(k => DateTime.Now.Subtract(k.TimeOfBan).TotalSeconds <= k.Duration);
+                var totalBansInEffect =
+                    inEffect.Count(k => DateTime.Now.Subtract(k.TimeOfBan).TotalSeconds <= k.Duration);
 
                 await actor.PrintMessageAsync(m_StringLocalizer["commands:bans:global",
                     new {Total = totalBans, InEffect = totalBansInEffect}]);
