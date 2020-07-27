@@ -41,7 +41,9 @@ namespace Pustalorc.GlobalBan.Commands
 
             // Parse arguments
             var target = await Context.Parameters.GetAsync<string>(0);
-            var reason = Context.Parameters.GetArgumentLine(1);
+            var reason = "N/A";
+            if (Context.Parameters.Count >= 2)
+                reason = Context.Parameters.GetArgumentLine(1);
 
             // Try find user to kick
             var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
@@ -65,8 +67,8 @@ namespace Pustalorc.GlobalBan.Commands
             if (!(actor is ConsoleActor))
                 m_Logger.LogInformation(translation);
 
-            await m_Plugin.Instance?.SendWebhookAsync(WebhookType.Kick, player.DisplayName, actor.DisplayName, reason,
-                player.SteamId.ToString(), 0);
+            if (m_Plugin.Instance != null)
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Kick, player.DisplayName, actor.DisplayName, reason, player.SteamId.ToString(), 0);
         }
     }
 }

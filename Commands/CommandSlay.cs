@@ -116,9 +116,9 @@ namespace Pustalorc.GlobalBan.Commands
             await actor.PrintMessageAsync(translated);
             if (!(actor is ConsoleActor))
                 m_Logger.LogInformation(translated);
-
-            await m_Plugin.Instance?.SendWebhookAsync(WebhookType.Ban, characterName, actor.DisplayName, reason,
-                steamId.ToString(), uint.MaxValue);
+            
+            if (m_Plugin.Instance != null)
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Ban, characterName, actor.DisplayName, reason, steamId.ToString(), uint.MaxValue);
         }
     }
 }
