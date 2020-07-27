@@ -5,18 +5,14 @@ With this plugin, you can ban players off your Unturned 3 server without having 
 
 
 ## Current Features
-
-`/ban <player> [time] [reason]` - Bans a player for `[time]` (seconds) with the specified reason. Note that the reason does not have to be in double quotes (`"reason"`)
-
-`/banhistory [player]` - Displays the last 4 bans of a player or yourself. (Cannot display bans of console, so this will instead throw a friendly exception).
-
-`/bans [player]` - Displays the total number of bans in the server as well as how many are active. If a player is specified, it will instead display the number of bans they have, as well as how many are active.
-
-`/kick <player> [reason]` - Kicks a player with the specified reason.
-
-`/slay <player> [reason]` - Kills and permanently bans the player for the specified reason.
-
-`/unban <player>` - Unbans the specific player. This can also be their IP or their HWID as displayed in the DB.
+| Command & Arguments     | Description                                                                                                                                                                                     |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/ban  [time] [reason]` | Bans a player for `[time]` (seconds) with the specified reason. Note that the reason does not have to be in double quotes (`"reason"`).                                                         |
+| `/banhistory [player]`  | Displays the last 4 bans of a player or yourself. (Cannot display bans of console, so this will instead throw a friendly exception).                                                            |
+| `/bans [player]`        | Displays the total number of bans in the server as well as how many are active. If a player is specified, it will instead display the number of bans they have, as well as how many are active. |
+| `/kick  [reason]`       | Kicks a player with the specified reason.                                                                                                                                                       |
+| `/slay  [reason]`       | Kills and permanently bans the player for the specified reason.                                                                                                                                 |
+| `/unban `               | Unbans the specific player. This can also be their IP or their HWID as displayed in the DB.                                                                                                     |
 
 
 `/ban` has a configuration option that allows it to no longer provide IP & HWID bans, but `/slay` will always support IP & HWID banning.
