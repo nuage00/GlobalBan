@@ -1,3 +1,39 @@
-plugin_events:
-  plugin_start: "Hello World"
-  plugin_stop: "Good bye :("
+commands:
+  global:
+    playernotfound: "{Input} was not found online, or is not a player."
+  ban:
+    banned: "{Player} was banned from the server for {Reason}!"
+  kick:
+    kicked: "{Player} was kicked from the server for {Reason}."
+  bans:
+    global: "There are a total of {Total} registered bans, and {InEffect} are still in-effect."
+    count: "{Player} has been banned a total of {Total} times and has {InEffect} bans still in-effect."
+    last_ban: "Their last ban was {Ban.TimeOfBan} for {Ban.Reason} and lasts/lasted for a total of {Ban.Duration}. They were banned by {Ban.AdminId}."
+  banhistory:
+    format: "Ban #{Ban.Id}: {Player} was banned for {Ban.Reason} on {Ban.TimeOfBan} for a total of {Ban.Duration}s. Banned by {Ban.AdminId}."
+  unban:
+    no_bans: "There are no bans for {Target}"
+    unbanned: "{BanCount} number of bans were removed for {Target}"
+
+webhooks:
+  global:
+    displayname: "Global Ban"
+    steam64id: "Steam 64 ID:"
+    time: "Done at:"
+    reason: "Reason:"
+    duration: "Ban duration:"
+  banevading:
+    title: "A player tried to evade their ban!"
+    description: "{Player} was banned from the server for {Reason}!"
+  ban:
+    title: "A player was banned from the server."
+    description: "{Player} was banned from the server for {Reason}!"
+    banned_by: "Banned by:"
+  unban:
+    title: "A player was unbbanned from the server."
+    description: "{Player} was unbanned from the server!"
+    unbanned_by: "Unbanned by:"
+  kick:
+    title: "A player was banned from the server."
+    description: "{Player} was banned from the server for {Reason}!"
+    kicked_by: "Kicked by:"
