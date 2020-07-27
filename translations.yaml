@@ -19,7 +19,7 @@ webhooks:
   global:
     displayname: "Global Ban"
     steam64id: "Steam 64 ID:"
-    time: "Done at:"
+    time: "Action Executed At:"
     reason: "Reason:"
     duration: "Ban duration:"
   banevading:
