@@ -76,7 +76,7 @@ namespace Pustalorc.GlobalBan.Database
 
         private IQueryable<PlayerBan> GetBansByHwid(string searchTerm)
         {
-            if (string.IsNullOrEmpty(searchTerm) || searchTerm.Equals("00000000000000000000"))
+            if (string.IsNullOrEmpty(searchTerm) || searchTerm.Equals("00000000000000000000") || searchTerm.Length < 20)
                 return m_DbContext.PlayerBans.Take(0);
 
             return m_DbContext.PlayerBans.Where(k => !string.IsNullOrEmpty(k.Hwid) && k.Hwid.Equals(searchTerm));
