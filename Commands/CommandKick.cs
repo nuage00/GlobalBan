@@ -1,87 +1,75 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using fr34kyn01535.GlobalBan.API;
-using JetBrains.Annotations;
-using Rocket.API;
-using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using OpenMod.API.Plugins;
+using OpenMod.API.Users;
+using OpenMod.Core.Commands;
+using OpenMod.Core.Console;
+using OpenMod.Core.Users;
+using OpenMod.Unturned.Users;
+using Pustalorc.GlobalBan.API.Enums;
 using SDG.Unturned;
+using Command = OpenMod.Core.Commands.Command;
 
-namespace fr34kyn01535.GlobalBan.Commands
+namespace Pustalorc.GlobalBan.Commands
 {
-    public class CommandKick : IRocketCommand
+    [Command("kick")]
+    [CommandSyntax("<player> [reason]")]
+    [CommandDescription("Kicks a player from the server.")]
+    public class CommandKick : Command
     {
-        [NotNull] public string Help => "Kicks a player";
+        private readonly IUserManager m_UserManager;
+        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly IPluginAccessor<GlobalBanPlugin> m_Plugin;
+        private readonly ILogger<CommandKick> m_Logger;
 
-        [NotNull] public string Name => "kick";
-
-        [NotNull] public string Syntax => "<player> [reason]";
-
-        [NotNull] public List<string> Aliases => new List<string>();
-
-        public AllowedCaller AllowedCaller => AllowedCaller.Both;
-
-        [NotNull] public List<string> Permissions => new List<string> {"globalban.kick"};
-
-        public void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public CommandKick(IUserManager userManager, IStringLocalizer stringLocalizer,
+            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, ILogger<CommandKick> logger,
+            IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            if (command.Length == 0 || command.Length > 2)
+            m_UserManager = userManager;
+            m_StringLocalizer = stringLocalizer;
+            m_Plugin = globalBanPlugin;
+            m_Logger = logger;
+        }
+
+        protected override async Task OnExecuteAsync()
+        {
+            var actor = Context.Actor;
+
+            // Parse arguments
+            var target = await Context.Parameters.GetAsync<string>(0);
+            var reason = "N/A";
+            if (Context.Parameters.Count >= 2)
+                reason = Context.Parameters.GetArgumentLine(1);
+
+            // Try find user to kick
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
+
+            if (!(user is UnturnedUser player))
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                await actor.PrintMessageAsync(m_StringLocalizer["commands:global:playernotfound",
+                    new {Input = target}]);
                 return;
             }
 
-            var playerToKick = UnturnedPlayer.FromName(command[0]);
-            if (playerToKick == null)
-            {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                return;
-            }
+            // User was found, kick.
+            await UniTask.SwitchToMainThread();
+            Provider.kick(player.SteamId, reason);
+            await UniTask.SwitchToThreadPool();
 
-            if (command.Length >= 2)
-            {
-                UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public_reason", playerToKick.CharacterName,
-                    command[1]));
-                Provider.kick(playerToKick.CSteamID, command[1]);
+            var translation =
+                m_StringLocalizer["commands:kick:kicked", new {Player = player.DisplayName, Reason = reason}];
+            await m_UserManager.BroadcastAsync(translation);
+            await actor.PrintMessageAsync(translation);
+            if (!(actor is ConsoleActor))
+                m_Logger.LogInformation(translation);
 
-                Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordKickWebhook,
-                    Discord.BuildDiscordEmbed("A player was kicked from the server.",
-                        $"{playerToKick.CharacterName} was kicked from the server for {command[1]}!",
-                        GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                        GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
-                        GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
-                        new[]
-                        {
-                            Discord.BuildDiscordField("Steam64ID", playerToKick.CSteamID.ToString(), true),
-                            Discord.BuildDiscordField("Kicked By", caller.DisplayName, true),
-                            Discord.BuildDiscordField("Time of Kick",
-                                DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                            Discord.BuildDiscordField("Reason of Kick", command[1], true)
-                        }));
-            }
-            else
-            {
-                UnturnedChat.Say(GlobalBan.Instance.Translate("command_kick_public", playerToKick.CharacterName));
-                Provider.kick(playerToKick.CSteamID,
-                    GlobalBan.Instance.Translate("command_kick_private_default_reason"));
-
-                Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordKickWebhook,
-                    Discord.BuildDiscordEmbed("A player was kicked from the server.",
-                        $"{playerToKick.CharacterName} was kicked from the server for {GlobalBan.Instance.Translate("command_kick_private_default_reason")}!",
-                        GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                        GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
-                        GlobalBan.Instance.Configuration.Instance.DiscordKickWebhookColor,
-                        new[]
-                        {
-                            Discord.BuildDiscordField("Steam64ID", playerToKick.CSteamID.ToString(), true),
-                            Discord.BuildDiscordField("Kicked By", caller.DisplayName, true),
-                            Discord.BuildDiscordField("Time of Kick",
-                                DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                            Discord.BuildDiscordField("Reason of Kick",
-                                GlobalBan.Instance.Translate("command_kick_private_default_reason"), true)
-                        }));
-            }
+            if (m_Plugin.Instance != null)
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Kick, player.DisplayName, actor.DisplayName,
+                    reason, player.SteamId.ToString(), 0);
         }
     }
 }

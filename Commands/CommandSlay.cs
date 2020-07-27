@@ -1,94 +1,125 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using fr34kyn01535.GlobalBan.API;
-using JetBrains.Annotations;
-using PlayerInfoLibrary;
-using Rocket.API;
-using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
+using OpenMod.API.Plugins;
+using OpenMod.API.Users;
+using OpenMod.Core.Commands;
+using OpenMod.Core.Console;
+using OpenMod.Core.Users;
+using OpenMod.Unturned.Users;
+using Pustalorc.GlobalBan.API.Enums;
+using Pustalorc.GlobalBan.API.Services;
+using Pustalorc.PlayerInfoLib.Unturned.Database;
 using SDG.Unturned;
 using Steamworks;
+using UnityEngine;
+using Command = OpenMod.Core.Commands.Command;
 
-namespace fr34kyn01535.GlobalBan.Commands
+namespace Pustalorc.GlobalBan.Commands
 {
-    public class CommandSlay : IRocketCommand
+    [Command("slay")]
+    [CommandSyntax("<player> [reason]")]
+    [CommandDescription(
+        "Kills and permanently bans a player from the server. HWID & IP Bans will always apply with this command.")]
+    public class CommandSlay : Command
     {
-        [NotNull] public string Help => "Banns a player for a year";
+        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly IUserManager m_UserManager;
+        private readonly IPluginAccessor<GlobalBanPlugin> m_Plugin;
+        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IGlobalBanRepository m_GlobalBanRepository;
+        private readonly ILogger<CommandSlay> m_Logger;
 
-        [NotNull] public string Name => "slay";
-
-        [NotNull] public string Syntax => "<player> [reason]";
-
-        [NotNull] public List<string> Aliases => new List<string>();
-
-        public AllowedCaller AllowedCaller => AllowedCaller.Both;
-
-        [NotNull] public List<string> Permissions => new List<string> {"globalban.slay"};
-
-        public async void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public CommandSlay(IStringLocalizer stringLocalizer, IUserManager userManager,
+            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPlayerInfoRepository playerInfoRepository,
+            IGlobalBanRepository globalBanRepository, ILogger<CommandSlay> logger, IServiceProvider serviceProvider) :
+            base(serviceProvider)
         {
-            if (command.Length == 0)
+            m_UserManager = userManager;
+            m_StringLocalizer = stringLocalizer;
+            m_Plugin = globalBanPlugin;
+            m_PlayerInfoRepository = playerInfoRepository;
+            m_GlobalBanRepository = globalBanRepository;
+            m_Logger = logger;
+        }
+
+        protected override async Task OnExecuteAsync()
+        {
+            var actor = Context.Actor;
+
+            // Parse arguments
+            var target = await Context.Parameters.GetAsync<string>(0);
+            var reason = "N/A";
+            if (Context.Parameters.Count >= 2)
+                reason = Context.Parameters.GetArgumentLine(1);
+
+            // Try to find user to ban
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+            var isId = ulong.TryParse(target, out var pId) && pId >= 76561197960265728 && pId <= 103582791429521408;
+
+            if (!(user is UnturnedUser) && pData == null && !isId)
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                await actor.PrintMessageAsync(m_StringLocalizer["commands:global:playernotfound",
+                    new {Input = target}]);
                 return;
             }
 
-            var args = command.ToList();
-            var target = args.GetIRocketPlayer(out var index);
-            if (index > -1)
-                args.RemoveAt(index);
+            var adminId = ulong.TryParse(actor.Id, out var id) ? id : 0ul;
+            CSteamID steamId;
+            string characterName;
+            string hwid;
+            uint ip;
 
-            if (target == null)
+            if (user is UnturnedUser player)
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                return;
+                steamId = player.SteamId;
+                characterName = player.DisplayName;
+                SteamGameServerNetworking.GetP2PSessionState(steamId, out var sessionState);
+                ip = sessionState.m_nRemoteIP == 0 ? 0 : sessionState.m_nRemoteIP;
+                hwid = string.Join("", player.SteamPlayer.playerID.hwid);
+
+                await UniTask.SwitchToMainThread();
+                player.Player.life.askDamage(101, Vector3.up * 101f, EDeathCause.KILL, ELimb.SKULL, (CSteamID) adminId,
+                    out _);
+                await UniTask.SwitchToThreadPool();
+            }
+            else if (pData != null)
+            {
+                steamId = (CSteamID) pData.Id;
+                characterName = pData.CharacterName;
+                ip = (uint) pData.Ip;
+                hwid = pData.Hwid;
+            }
+            else
+            {
+                steamId = (CSteamID) pId;
+                characterName = pId.ToString();
+                ip = 0;
+                hwid = "";
             }
 
-            var reason = string.Join(" ", args);
-
-            ulong adminId = 0;
-
-            if (caller is UnturnedPlayer cPlayer)
-                adminId = cPlayer.CSteamID.m_SteamID;
-
-            var adminName = caller.DisplayName;
-            var pData = await PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
-            var characterName = pData?.CharacterName ?? target.DisplayName;
-            var steamId = pData?.SteamId ?? new CSteamID(ulong.Parse(target.Id));
-            var ip = pData?.Ip ?? steamId.GetIp();
-            var hwid = pData != null
-                ? string.Join("", pData.Hwid)
-                : string.Join("", target is UnturnedPlayer tPlayer ? tPlayer.SteamPlayer().playerID.hwid : new byte[0]);
-
-            var isBanned = await GlobalBan.Instance.database.BanPlayer(steamId.m_SteamID, ip, hwid, adminId, reason, uint.MaxValue);
-
-            if (!isBanned)
+            var server = await m_PlayerInfoRepository.GetCurrentServerAsync();
+            await m_GlobalBanRepository.BanPlayerAsync(server?.Id ?? 0, steamId.m_SteamID, ip, hwid, uint.MaxValue,
+                adminId, reason);
+            if (user is UnturnedUser)
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_ban_fail"));
-                return;
-            }
-
-            UnturnedChat.Say(GlobalBan.Instance.Translate("command_ban_public_reason", characterName, reason));
-            if (target is UnturnedPlayer)
+                await UniTask.SwitchToMainThread();
                 Provider.ban(steamId, reason, uint.MaxValue);
+                await UniTask.SwitchToThreadPool();
+            }
 
-            Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordBanWebhook,
-                Discord.BuildDiscordEmbed("A player was banned from the server.",
-                    $"{characterName} was banned from the server for {reason}!",
-                    GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                    GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
-                    GlobalBan.Instance.Configuration.Instance.DiscordBanWebhookColor,
-                    new[]
-                    {
-                        Discord.BuildDiscordField("Steam64ID", steamId.ToString(), true),
-                        Discord.BuildDiscordField("Banned By", adminName, true),
-                        Discord.BuildDiscordField("Time of Ban",
-                            DateTime.Now.ToString(CultureInfo.InvariantCulture), false),
-                        Discord.BuildDiscordField("Reason of Ban", reason, true),
-                        Discord.BuildDiscordField("Ban duration", uint.MaxValue.ToString(), true)
-                    }));
+            var translated = m_StringLocalizer["commands:ban:banned", new {Player = characterName, Reason = reason}];
+            await m_UserManager.BroadcastAsync(translated);
+            await actor.PrintMessageAsync(translated);
+            if (!(actor is ConsoleActor))
+                m_Logger.LogInformation(translated);
+
+            if (m_Plugin.Instance != null)
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Ban, characterName, actor.DisplayName, reason,
+                    steamId.ToString(), uint.MaxValue);
         }
     }
 }

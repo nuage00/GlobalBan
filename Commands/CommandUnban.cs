@@ -1,73 +1,84 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using fr34kyn01535.GlobalBan.API;
-using JetBrains.Annotations;
-using PlayerInfoLibrary;
-using Rocket.API;
-using Rocket.Unturned.Chat;
-using Steamworks;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
+using OpenMod.API.Plugins;
+using OpenMod.API.Users;
+using OpenMod.Core.Commands;
+using Pustalorc.GlobalBan.API.Enums;
+using Pustalorc.GlobalBan.API.Services;
+using Pustalorc.PlayerInfoLib.Unturned.Database;
 
-namespace fr34kyn01535.GlobalBan.Commands
+namespace Pustalorc.GlobalBan.Commands
 {
-    public class CommandUnban : IRocketCommand
+    [Command("unban")]
+    [CommandSyntax("<player>")]
+    [CommandDescription("Unbans a banned player globally from the network.")]
+    public class CommandUnban : Command
     {
-        [NotNull] public string Help => "Unbanns a player";
+        private readonly IStringLocalizer m_StringLocalizer;
+        private readonly IUserManager m_UserManager;
+        private readonly IPluginAccessor<GlobalBanPlugin> m_Plugin;
+        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IGlobalBanRepository m_GlobalBanRepository;
 
-        [NotNull] public string Name => "unban";
-
-        [NotNull] public string Syntax => "<player>";
-
-        [NotNull] public List<string> Aliases => new List<string>();
-
-        public AllowedCaller AllowedCaller => AllowedCaller.Both;
-
-        [NotNull] public List<string> Permissions => new List<string> {"globalban.unban"};
-
-        public async void Execute(IRocketPlayer caller, [NotNull] params string[] command)
+        public CommandUnban(IStringLocalizer stringLocalizer, IUserManager userManager,
+            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPlayerInfoRepository playerInfoRepository,
+            IGlobalBanRepository globalBanRepository, IServiceProvider serviceProvider) :
+            base(serviceProvider)
         {
-            if (command.Length == 0)
+            m_UserManager = userManager;
+            m_StringLocalizer = stringLocalizer;
+            m_Plugin = globalBanPlugin;
+            m_PlayerInfoRepository = playerInfoRepository;
+            m_GlobalBanRepository = globalBanRepository;
+        }
+
+        protected override async Task OnExecuteAsync()
+        {
+            var actor = Context.Actor;
+
+            var target = await Context.Parameters.GetAsync<string>(0);
+            var unbans = await m_GlobalBanRepository.UnbanAutoFindAsync(target, BanSearchMode.All);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+
+            if (unbans.Count == 0)
             {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_invalid_parameter"));
+                if (pData == null)
+                {
+                    await actor.PrintMessageAsync(m_StringLocalizer["commands:global:playernotfound",
+                        new {Input = target}]);
+                    return;
+                }
+
+                unbans = await m_GlobalBanRepository.UnbanAutoFindAsync(pData.Id.ToString(), BanSearchMode.Id);
+
+                if (unbans.Count == 0)
+                {
+                    await actor.PrintMessageAsync(m_StringLocalizer["commands:unban:no_bans", new {Target = target}]);
+                    return;
+                }
+            }
+
+            var playerId = unbans.First().PlayerId;
+            if (unbans.Any(x => x.PlayerId != playerId))
+            {
+                await actor.PrintMessageAsync(m_StringLocalizer["commands:unban:unbanned",
+                    new {Target = target, BanCount = unbans.Count}]);
                 return;
             }
 
-            var args = command.ToList();
-            var target = args.GetIRocketPlayer(out var index);
-            if (index > -1)
-                args.RemoveAt(index);
+            var data = await m_PlayerInfoRepository.FindPlayerAsync(playerId.ToString(), UserSearchMode.Id);
+            var charName = data?.CharacterName ?? playerId.ToString();
+            var translated =
+                m_StringLocalizer["commands:unban:unbanned", new {Target = charName, BanCount = unbans.Count}];
 
-            if (target == null)
-            {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("command_generic_player_not_found"));
-                return;
-            }
+            await m_UserManager.BroadcastAsync(translated);
+            await actor.PrintMessageAsync(translated);
 
-            var pData = await PlayerInfoLib.Instance.database.QueryById(new CSteamID(ulong.Parse(target.Id)));
-
-            if (!await GlobalBan.Instance.database.TryUnban(ulong.Parse(target.Id)))
-            {
-                UnturnedChat.Say(caller, GlobalBan.Instance.Translate("unban_fail"));
-                return;
-            }
-
-            var characterName = pData?.CharacterName ?? target.DisplayName;
-
-            UnturnedChat.Say("The player " + characterName + " was unbanned");
-            Discord.SendWebhookPost(GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhook,
-                Discord.BuildDiscordEmbed("A player was unbanned from the server.",
-                    $"{characterName} was unbanned from the server.",
-                    GlobalBan.Instance.Configuration.Instance.WebhookDisplayName,
-                    GlobalBan.Instance.Configuration.Instance.WebhookImageUrl,
-                    GlobalBan.Instance.Configuration.Instance.DiscordUnbanWebhookColor,
-                    new[]
-                    {
-                        Discord.BuildDiscordField("Steam64ID", target.Id, true),
-                        Discord.BuildDiscordField("Unbanned By", caller.DisplayName, true),
-                        Discord.BuildDiscordField("Time of Unban", DateTime.Now.ToString(CultureInfo.InvariantCulture),
-                            false)
-                    }));
+            if (m_Plugin.Instance != null)
+                await m_Plugin.Instance.SendWebhookAsync(WebhookType.Unban, charName, actor.DisplayName, "",
+                    playerId.ToString(), 0);
         }
     }
 }

@@ -1,0 +1,22 @@
+database:
+  ConnectionStrings:
+    default: "Server=127.0.0.1; Database=openmod; Port=3306; User=root; Password=toor;" # See https://www.connectionstrings.com/mysql/ for more information on making ConnectionStrings
+
+webhooks:
+  image_url: "https://imperialproduction.blob.core.windows.net/shopcoreproducts/productlogos/194/13260ab6-c9b2-d350-64f3-39f360c60fe6/thumbnail.png"
+  banevading:
+    url: "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY"
+    color: "16711680"
+  ban:
+    url: "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY"
+    color: "16711680"
+  unban:
+    url: "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY"
+    color: "65280"
+  kick:
+    url: "https://discordapp.com/api/webhooks/XXXXX/YYYYYYY"
+    color: "16776960"
+
+commands:
+  ban:
+    ban_hwid_and_ip: "true"
