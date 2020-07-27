@@ -34,6 +34,6 @@ webhooks:
     description: "{Player} was unbanned from the server!"
     unbanned_by: "Unbanned by:"
   kick:
-    title: "A player was banned from the server."
-    description: "{Player} was banned from the server for {Reason}!"
+    title: "A player was kicked from the server."
+    description: "{Player} was kicked from the server for {Reason}!"
     kicked_by: "Kicked by:"
