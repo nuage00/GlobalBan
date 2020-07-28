@@ -85,7 +85,8 @@ namespace Pustalorc.GlobalBan
                 case BanType.Id:
                     var now = DateTime.Now;
 
-                    var bans = m_GlobalBanRepository.FindBansInEffect(steamId.ToString(), BanSearchMode.Id).OrderByDescending(k => k.TimeOfBan.AddSeconds(k.Duration).Subtract(now).TotalSeconds);
+                    var bans = m_GlobalBanRepository.FindBansInEffect(steamId.ToString(), BanSearchMode.Id)
+                        .OrderByDescending(k => k.TimeOfBan.AddSeconds(k.Duration).Subtract(now).TotalSeconds).ToList();
                     var ban = bans.FirstOrDefault();
                     if (ban == null) return;
 
@@ -93,7 +94,7 @@ namespace Pustalorc.GlobalBan
                     banReason = ban.Reason;
                     var remainingDuration = ban.TimeOfBan.AddSeconds(ban.Duration).Subtract(DateTime.Now).TotalSeconds;
                     banRemainingDuration =
-                        (uint)Math.Min(uint.MaxValue,
+                        (uint) Math.Min(uint.MaxValue,
                             remainingDuration); // Makes sure that the maximum number sent back is uint.MaxValue, even if remaining duration is higher (it would overflow otherwise and give the wrong duration)
 
                     if (!bans.Any(k => k.Hwid.Equals(hwid) && k.Ip == remoteIp))
