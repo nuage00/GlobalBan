@@ -17,7 +17,7 @@ using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.External;
 using Pustalorc.GlobalBan.API.Services;
 using Pustalorc.GlobalBan.Database;
-using Pustalorc.PlayerInfoLib.Unturned.Database;
+using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using SDG.Unturned;
 using Math = System.Math;
 

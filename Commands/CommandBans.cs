@@ -11,7 +11,7 @@ using OpenMod.Unturned.Users;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
 using Pustalorc.GlobalBan.Database;
-using Pustalorc.PlayerInfoLib.Unturned.Database;
+using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using Steamworks;
 
 namespace Pustalorc.GlobalBan.Commands

@@ -12,7 +12,7 @@ using OpenMod.Core.Users;
 using OpenMod.Unturned.Users;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
-using Pustalorc.PlayerInfoLib.Unturned.Database;
+using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using SDG.Unturned;
 using Steamworks;
 using Command = OpenMod.Core.Commands.Command;

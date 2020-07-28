@@ -7,7 +7,7 @@ using OpenMod.API.Users;
 using OpenMod.Core.Commands;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
-using Pustalorc.PlayerInfoLib.Unturned.Database;
+using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 
 namespace Pustalorc.GlobalBan.Commands
 {
