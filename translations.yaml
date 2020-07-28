@@ -1,6 +1,12 @@
+internal:
+  ban_evading_reason: "Ban Evading"
+  ban_evading_admin_name: "Global Ban Plugin"
+  new_ip_or_hwid_ban_reason: "New IP and or HWID"
+
 commands:
   global:
     playernotfound: "{Input} was not found online, or is not a player."
+    no_reason_specified: "N/A"
   ban:
     banned: "{Player} was banned from the server for {Reason}!"
   kick:

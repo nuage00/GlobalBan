@@ -57,7 +57,7 @@ namespace Pustalorc.GlobalBan.Commands
             if (!Context.Parameters.TryGet<uint>(1, out var duration))
                 duration = uint.MaxValue;
 
-            var reason = "N/A";
+            var reason = m_StringLocalizer["commands:global:no_reason_specified"].Value;
             if (Context.Parameters.Count >= 3)
                 reason = Context.Parameters.GetArgumentLine(2);
 

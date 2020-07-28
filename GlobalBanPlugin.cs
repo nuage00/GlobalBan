@@ -20,6 +20,7 @@ using Pustalorc.GlobalBan.API.Services;
 using Pustalorc.GlobalBan.Database;
 using Pustalorc.PlayerInfoLib.Unturned.Database;
 using SDG.Unturned;
+using Math = System.Math;
 
 [assembly:
     PluginMetadata("Pustalorc.GlobalBan", Author = "Pustalorc", DisplayName = "Global Ban",
@@ -78,44 +79,43 @@ namespace Pustalorc.GlobalBan
         {
             var steamId = playerId.steamID.m_SteamID;
             var hwid = string.Join("", playerId.hwid);
+            var server = m_PlayerInfoRepository.GetCurrentServer();
 
             switch (m_GlobalBanRepository.CheckBan(steamId, remoteIp, hwid))
             {
                 case BanType.Id:
-                    var ban = m_GlobalBanRepository.FindBansInEffect(steamId.ToString(), BanSearchMode.Id)
-                        .FirstOrDefault();
+                    var now = DateTime.Now;
+
+                    var ban = m_GlobalBanRepository.FindBansInEffect(steamId.ToString(), BanSearchMode.Id).OrderByDescending(k => k.TimeOfBan.AddSeconds(k.Duration).Subtract(now).TotalSeconds).FirstOrDefault();
                     if (ban == null) return;
 
                     isBanned = true;
                     banReason = ban.Reason;
-                    banRemainingDuration =
-                        (uint) ban.TimeOfBan.AddSeconds(ban.Duration).Subtract(DateTime.Now).TotalSeconds;
+                    var remainingDuration = ban.TimeOfBan.AddSeconds(ban.Duration).Subtract(DateTime.Now).TotalSeconds;
+                    banRemainingDuration = (uint)Math.Min(uint.MaxValue, remainingDuration); // Makes sure that the maximum number sent back is uint.MaxValue, even if remaining duration is higher (it would overflow otherwise and give the wrong duration)
+
+                    if (!ban.Hwid.Equals(hwid) || ban.Ip != remoteIp)
+                    {
+                        m_GlobalBanRepository.BanPlayer(server?.Id ?? 0, steamId, remoteIp, hwid, banRemainingDuration, 0, m_StringLocalizer["internal:new_ip_or_hwid_ban_reason"]);
+
+                        var translation = m_StringLocalizer["commands:ban:banned", new { Player = playerId.characterName, Reason = banReason }];
+                        m_UserManager.BroadcastAsync(translation);
+                        m_Logger.LogInformation(translation);
+                        SendWebhook(WebhookType.BanEvading, playerId.characterName, m_StringLocalizer["internal:ban_evading_admin_name"], banReason, steamId.ToString(), banRemainingDuration);
+                    }
                     break;
                 case BanType.Ip:
                 case BanType.Hwid:
                     isBanned = true;
-                    banReason = "Ban Evading";
+                    banReason = m_StringLocalizer["internal:ban_evading_reason"];
                     banRemainingDuration = uint.MaxValue;
 
-                    var server = m_PlayerInfoRepository.GetCurrentServer();
-                    m_GlobalBanDbContext.PlayerBans.Add(new PlayerBan
-                    {
-                        Duration = uint.MaxValue,
-                        AdminId = 0,
-                        Hwid = hwid,
-                        Ip = remoteIp,
-                        IsUnbanned = false,
-                        PlayerId = steamId,
-                        Reason = banReason,
-                        ServerId = server?.Id ?? 0,
-                        TimeOfBan = DateTime.Now
-                    });
-                    m_GlobalBanDbContext.SaveChanges();
+                    m_GlobalBanRepository.BanPlayer(server?.Id ?? 0, steamId, remoteIp, hwid, uint.MaxValue, 0, banReason);
 
-                    m_UserManager.BroadcastAsync(m_StringLocalizer["commands:ban:banned",
-                        new {Player = playerId.characterName, Reason = "Ban Evading"}]);
-                    SendWebhook(WebhookType.Ban, playerId.characterName, "Global Ban Plugin", banReason,
-                        steamId.ToString(), uint.MaxValue);
+                    var translated = m_StringLocalizer["commands:ban:banned", new { Player = playerId.characterName, Reason = banReason }];
+                    m_UserManager.BroadcastAsync(translated);
+                    m_Logger.LogInformation(translated);
+                    SendWebhook(WebhookType.BanEvading, playerId.characterName, m_StringLocalizer["internal:ban_evading_admin_name"], banReason, steamId.ToString(), uint.MaxValue);
                     break;
                 default:
                     return;

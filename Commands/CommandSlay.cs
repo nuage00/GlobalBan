@@ -51,7 +51,7 @@ namespace Pustalorc.GlobalBan.Commands
 
             // Parse arguments
             var target = await Context.Parameters.GetAsync<string>(0);
-            var reason = "N/A";
+            var reason = m_StringLocalizer["commands:global:no_reason_specified"].Value;
             if (Context.Parameters.Count >= 2)
                 reason = Context.Parameters.GetArgumentLine(1);
 

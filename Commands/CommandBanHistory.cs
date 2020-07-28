@@ -44,7 +44,7 @@ namespace Pustalorc.GlobalBan.Commands
             if (!Context.Parameters.TryGet<string>(0, out var target))
             {
                 if (!(actor is UnturnedUser actorUser))
-                    throw new CommandNotFoundException("You cannot run this command from console.");
+                    throw new CommandWrongUsageException(Context);
 
                 var bans = await m_GlobalBanRepository.FindBansAsync(actorUser.SteamId.ToString(), BanSearchMode.Id);
 
@@ -61,7 +61,7 @@ namespace Pustalorc.GlobalBan.Commands
             if (!(user is UnturnedUser) && pData == null)
             {
                 if (!(actor is UnturnedUser actorUser))
-                    throw new CommandNotFoundException("You cannot run this command from console.");
+                    throw new CommandWrongUsageException(Context);
 
                 var bans = await m_GlobalBanRepository.FindBansAsync(actorUser.SteamId.ToString(), BanSearchMode.Id);
 
