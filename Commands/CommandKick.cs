@@ -46,7 +46,7 @@ namespace Pustalorc.GlobalBan.Commands
                 reason = Context.Parameters.GetArgumentLine(1);
 
             // Try find user to kick
-            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
 
             if (!(user is UnturnedUser player))
             {

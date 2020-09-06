@@ -55,8 +55,8 @@ namespace Pustalorc.GlobalBan.Commands
                 return;
             }
 
-            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
 
             if (!(user is UnturnedUser) && pData == null)
             {

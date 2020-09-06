@@ -1,6 +1,4 @@
-﻿using Autofac;
-using Microsoft.Extensions.Configuration;
-using OpenMod.API.Plugins;
+﻿using OpenMod.API.Plugins;
 using OpenMod.EntityFrameworkCore.Extensions;
 using Pustalorc.GlobalBan.Database;
 using Pustalorc.PlayerInfoLib.Unturned.Database;
@@ -9,12 +7,11 @@ namespace Pustalorc.GlobalBan
 {
     public class ContainerConfigurator : IPluginContainerConfigurator
     {
-        public void ConfigureContainer(ILifetimeScope parentLifetimeScope, IConfiguration configuration,
-            ContainerBuilder containerBuilder)
+        public void ConfigureContainer(IPluginServiceConfigurationContext context)
         {
-            containerBuilder.AddEntityFrameworkCoreMySql();
-            containerBuilder.AddDbContext<GlobalBanDbContext>();
-            containerBuilder.AddDbContext<PlayerInfoLibDbContext>();
+            context.ContainerBuilder.AddEntityFrameworkCoreMySql();
+            context.ContainerBuilder.AddDbContext<GlobalBanDbContext>();
+            context.ContainerBuilder.AddDbContext<PlayerInfoLibDbContext>();
         }
     }
 }

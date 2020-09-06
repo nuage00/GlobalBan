@@ -40,7 +40,7 @@ namespace Pustalorc.GlobalBan.Commands
 
             var target = await Context.Parameters.GetAsync<string>(0);
             var unbans = await m_GlobalBanRepository.UnbanAutoFindAsync(target, BanSearchMode.All);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
 
             if (unbans.Count == 0)
             {
@@ -68,7 +68,7 @@ namespace Pustalorc.GlobalBan.Commands
                 return;
             }
 
-            var data = await m_PlayerInfoRepository.FindPlayerAsync(playerId.ToString(), UserSearchMode.Id);
+            var data = await m_PlayerInfoRepository.FindPlayerAsync(playerId.ToString(), UserSearchMode.FindById);
             var charName = data?.CharacterName ?? playerId.ToString();
             var translated =
                 m_StringLocalizer["commands:unban:unbanned", new {Target = charName, BanCount = unbans.Count}];

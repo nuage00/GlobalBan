@@ -54,8 +54,8 @@ namespace Pustalorc.GlobalBan.Commands
                 return;
             }
 
-            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
 
             if (user is UnturnedUser || pData != null)
             {
@@ -63,7 +63,7 @@ namespace Pustalorc.GlobalBan.Commands
 
                 var steamId = player?.SteamId ?? (CSteamID) pData.Id;
                 var characterName = player?.DisplayName ?? pData.CharacterName;
-                var hwid = player != null ? string.Join("", player.SteamPlayer.playerID.hwid) : pData.Hwid;
+                var hwid = player != null ? string.Join("", player.Player.SteamPlayer.playerID.hwid) : pData.Hwid;
                 uint ip;
                 if (player != null)
                 {

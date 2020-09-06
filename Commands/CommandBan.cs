@@ -66,8 +66,8 @@ namespace Pustalorc.GlobalBan.Commands
             var shouldIpAndHwidBan = m_Configuration.GetSection("commands:ban:ban_hwid_and_ip").Get<bool>();
 
             // Try to find user to ban
-            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.NameOrId);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.NameOrId);
+            var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
+            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
             var isId = ulong.TryParse(target, out var pId) && pId >= 76561197960265728 && pId <= 103582791429521408;
 
             if ((user == null || user is OfflineUser) && pData == null && !isId)
@@ -91,7 +91,7 @@ namespace Pustalorc.GlobalBan.Commands
                 {
                     SteamGameServerNetworking.GetP2PSessionState(steamId, out var sessionState);
                     ip = sessionState.m_nRemoteIP == 0 ? 0 : sessionState.m_nRemoteIP;
-                    hwid = string.Join("", player.SteamPlayer.playerID.hwid);
+                    hwid = string.Join("", player.Player.SteamPlayer.playerID.hwid);
                 }
             }
             else if (pData != null)
