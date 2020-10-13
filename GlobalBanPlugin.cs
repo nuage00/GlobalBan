@@ -68,6 +68,8 @@ namespace Pustalorc.GlobalBan
 
         protected override UniTask OnUnloadAsync()
         {
+            Provider.onCheckBanStatusWithHWID -= CheckBanned;
+
             m_Logger.LogInformation("Global Ban for Unturned by Pustalorc was unloaded correctly.");
 
             return UniTask.CompletedTask;
