@@ -64,17 +64,7 @@ namespace Pustalorc.GlobalBan.Commands
                 var steamId = player?.SteamId ?? (CSteamID) pData.Id;
                 var characterName = player?.DisplayName ?? pData.CharacterName;
                 var hwid = player != null ? string.Join("", player.Player.SteamPlayer.playerID.hwid) : pData.Hwid;
-                uint ip;
-                if (player != null)
-                {
-                    SteamGameServerNetworking.GetP2PSessionState(player.SteamId, out var sessionState);
-                    ip = sessionState.m_nRemoteIP == 0 ? 0 : sessionState.m_nRemoteIP;
-                }
-                else
-                {
-                    ip = (uint) pData.Ip;
-                }
-
+                var ip = player != null ? player.Player.SteamPlayer.getIPv4AddressOrZero() : (uint) pData.Ip;
                 var idBans = await m_GlobalBanRepository.FindBansInEffectAsync(steamId.ToString(), BanSearchMode.Id);
                 var ipBans = await m_GlobalBanRepository.FindBansInEffectAsync(ip.ToString(), BanSearchMode.Ip);
                 var hwidBans = await m_GlobalBanRepository.FindBansInEffectAsync(hwid, BanSearchMode.Hwid);

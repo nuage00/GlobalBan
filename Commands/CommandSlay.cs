@@ -77,8 +77,7 @@ namespace Pustalorc.GlobalBan.Commands
             {
                 steamId = player.SteamId;
                 characterName = player.DisplayName;
-                SteamGameServerNetworking.GetP2PSessionState(steamId, out var sessionState);
-                ip = sessionState.m_nRemoteIP == 0 ? 0 : sessionState.m_nRemoteIP;
+                ip = player.Player.SteamPlayer.getIPv4AddressOrZero();
                 hwid = string.Join("", player.Player.SteamPlayer.playerID.hwid);
 
                 await UniTask.SwitchToMainThread();
@@ -104,12 +103,10 @@ namespace Pustalorc.GlobalBan.Commands
             var server = await m_PlayerInfoRepository.GetCurrentServerAsync();
             await m_GlobalBanRepository.BanPlayerAsync(server?.Id ?? 0, steamId.m_SteamID, ip, hwid, uint.MaxValue,
                 adminId, reason);
-            if (user is UnturnedUser)
-            {
-                await UniTask.SwitchToMainThread();
-                Provider.ban(steamId, reason, uint.MaxValue);
-                await UniTask.SwitchToThreadPool();
-            }
+
+            await UniTask.SwitchToMainThread();
+            Provider.ban(steamId, reason, uint.MaxValue);
+            await UniTask.SwitchToThreadPool();
 
             var translated = m_StringLocalizer["commands:ban:banned", new {Player = characterName, Reason = reason}];
             await m_UserManager.BroadcastAsync(translated);
