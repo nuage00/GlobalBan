@@ -16,7 +16,9 @@
     <PackageProjectUrl>https://github.com/Pustalorc/GlobalBan</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Pustalorc/GlobalBan</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>
-    <PackageReleaseNotes>Update to latest OpenMod version</PackageReleaseNotes>
+    <PackageReleaseNotes>Update to latest OpenMod version.
+Fix IP retrieval issues.
+Fix session termination issues.</PackageReleaseNotes>
     <AssemblyName>Pustalorc.GlobalBan</AssemblyName>
     <UserSecretsId>072ee54b-9ca3-4daf-a982-5a79d6814f1d</UserSecretsId>
   </PropertyGroup>
@@ -27,10 +29,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="morelinq" Version="3.3.2" />
-    <PackageReference Include="OpenMod.EntityFrameworkCore" Version="2.1.2" />
-    <PackageReference Include="OpenMod.Unturned" Version="2.1.2" />
-	<PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.9" />
-	<PackageReference Include="OpenMod.UnityEngine.Redist" Version="2018.4.23" />
+    <PackageReference Include="OpenMod.EntityFrameworkCore" Version="2.2.0" />
+    <PackageReference Include="OpenMod.Unturned" Version="2.2.0" />
+	<PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.11" />
+	<PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.3.5" />
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -38,8 +40,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pustalorc.PlayerInfoLib.Unturned" Version="3.2.3" />
-    <PackageReference Include="RestSharp" Version="106.11.4" />
+    <PackageReference Include="Pustalorc.PlayerInfoLib.Unturned" Version="3.2.4" />
+    <PackageReference Include="RestSharp" Version="106.11.7" />
   </ItemGroup>
 
   <ItemGroup>
