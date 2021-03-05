@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using MoreLinq;
+using OpenMod.API.Plugins;
 using OpenMod.API.Users;
 using OpenMod.Core.Commands;
 using OpenMod.Core.Users;
@@ -11,6 +13,7 @@ using OpenMod.Unturned.Users;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
 using Pustalorc.GlobalBan.Database;
+using Pustalorc.PlayerInfoLib.Unturned;
 using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using Steamworks;
 
@@ -22,17 +25,16 @@ namespace Pustalorc.GlobalBan.Commands
     public class CommandBans : Command
     {
         private readonly IUserManager m_UserManager;
-        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IPluginAccessor<PlayerInfoLibrary> m_PilPlugin;
         private readonly IGlobalBanRepository m_GlobalBanRepository;
         private readonly IStringLocalizer m_StringLocalizer;
         private readonly GlobalBanDbContext m_DbContext;
 
-        public CommandBans(IStringLocalizer stringLocalizer, GlobalBanDbContext globalBanDbContext,
-            IUserManager userManager, IPlayerInfoRepository playerInfoRepository,
-            IGlobalBanRepository globalBanRepository, IServiceProvider serviceProvider) : base(serviceProvider)
+        public CommandBans(IStringLocalizer stringLocalizer, IPluginAccessor<PlayerInfoLibrary> pilPlugin, GlobalBanDbContext globalBanDbContext,
+            IUserManager userManager, IGlobalBanRepository globalBanRepository, IServiceProvider serviceProvider) : base(serviceProvider)
         {
             m_UserManager = userManager;
-            m_PlayerInfoRepository = playerInfoRepository;
+            m_PilPlugin = pilPlugin;
             m_GlobalBanRepository = globalBanRepository;
             m_StringLocalizer = stringLocalizer;
             m_DbContext = globalBanDbContext;
@@ -55,13 +57,13 @@ namespace Pustalorc.GlobalBan.Commands
             }
 
             var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
+            var pData = await m_PilPlugin.Instance.LifetimeScope.Resolve<IPlayerInfoRepository>().FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
 
             if (user is UnturnedUser || pData != null)
             {
                 var player = user as UnturnedUser;
 
-                var steamId = player?.SteamId ?? (CSteamID) pData.Id;
+                var steamId = player?.SteamId ?? (CSteamID) ulong.Parse(pData.Id);
                 var characterName = player?.DisplayName ?? pData.CharacterName;
                 var hwid = player != null ? string.Join("", player.Player.SteamPlayer.playerID.hwid) : pData.Hwid;
                 var ip = player != null ? player.Player.SteamPlayer.getIPv4AddressOrZero() : (uint) pData.Ip;

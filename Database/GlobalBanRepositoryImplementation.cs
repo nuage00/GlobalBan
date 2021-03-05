@@ -16,7 +16,7 @@ using Pustalorc.GlobalBan.API.Services;
 
 namespace Pustalorc.GlobalBan.Database
 {
-    [ServiceImplementation(Lifetime = ServiceLifetime.Scoped, Priority = Priority.Normal)]
+    [PluginServiceImplementation(Lifetime = ServiceLifetime.Singleton, Priority = Priority.Lowest)]
     public class GlobalBanRepositoryImplementation : IGlobalBanRepository
     {
         private readonly GlobalBanDbContext m_DbContext;
@@ -64,7 +64,7 @@ namespace Pustalorc.GlobalBan.Database
             if (!ulong.TryParse(searchTerm, out var id) || id < 76561197960265728 || id > 103582791429521408)
                 return m_DbContext.PlayerBans.Take(0);
 
-            return m_DbContext.PlayerBans.Where(k => k.PlayerId == id);
+            return m_DbContext.PlayerBans.Where(k => k.PlayerId.Equals(id.ToString(), StringComparison.OrdinalIgnoreCase));
         }
 
         private IQueryable<PlayerBan> GetBansByIp(string searchTerm)
@@ -192,11 +192,11 @@ namespace Pustalorc.GlobalBan.Database
             return new PlayerBan
             {
                 Duration = duration,
-                AdminId = adminId,
+                AdminId = adminId.ToString(),
                 Hwid = hwid,
                 Ip = ip,
                 IsUnbanned = false,
-                PlayerId = playerId,
+                PlayerId = playerId.ToString(),
                 Reason = reason,
                 ServerId = serverId,
                 TimeOfBan = DateTime.Now

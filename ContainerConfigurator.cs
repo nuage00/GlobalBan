@@ -1,7 +1,6 @@
 ﻿using OpenMod.API.Plugins;
 using OpenMod.EntityFrameworkCore.Extensions;
 using Pustalorc.GlobalBan.Database;
-using Pustalorc.PlayerInfoLib.Unturned.Database;
 
 namespace Pustalorc.GlobalBan
 {
@@ -11,7 +10,6 @@ namespace Pustalorc.GlobalBan
         {
             context.ContainerBuilder.AddEntityFrameworkCoreMySql();
             context.ContainerBuilder.AddDbContext<GlobalBanDbContext>();
-            context.ContainerBuilder.AddDbContext<PlayerInfoLibDbContext>();
         }
     }
 }

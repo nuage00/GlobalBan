@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
@@ -17,6 +18,7 @@ using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.External;
 using Pustalorc.GlobalBan.API.Services;
 using Pustalorc.GlobalBan.Database;
+using Pustalorc.PlayerInfoLib.Unturned;
 using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using SDG.Unturned;
 using Math = System.Math;
@@ -35,15 +37,14 @@ namespace Pustalorc.GlobalBan
         private readonly IUserManager m_UserManager;
         private readonly GlobalBanDbContext m_GlobalBanDbContext;
         private readonly IGlobalBanRepository m_GlobalBanRepository;
-        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IPluginAccessor<PlayerInfoLibrary> m_PilPlugin;
 
         public GlobalBanPlugin(
             IConfiguration configuration,
             IStringLocalizer stringLocalizer,
             ILogger<GlobalBanPlugin> logger,
             IUserManager userManager,
-            IPlayerInfoRepository playerInfoRepository,
-            IGlobalBanRepository globalBanRepository,
+            IGlobalBanRepository globalBanRepository, IPluginAccessor<PlayerInfoLibrary> pilPlugin, 
             GlobalBanDbContext globalBanDbContext,
             IServiceProvider serviceProvider) : base(serviceProvider)
         {
@@ -53,7 +54,7 @@ namespace Pustalorc.GlobalBan
             m_UserManager = userManager;
             m_GlobalBanDbContext = globalBanDbContext;
             m_GlobalBanRepository = globalBanRepository;
-            m_PlayerInfoRepository = playerInfoRepository;
+            m_PilPlugin = pilPlugin;
         }
 
         protected override async UniTask OnLoadAsync()
@@ -80,7 +81,7 @@ namespace Pustalorc.GlobalBan
         {
             var steamId = playerId.steamID.m_SteamID;
             var hwid = string.Join("", playerId.hwid);
-            var server = m_PlayerInfoRepository.GetCurrentServer();
+            var server = m_PilPlugin.Instance.LifetimeScope.Resolve<IPlayerInfoRepository>().GetCurrentServer();
 
             switch (m_GlobalBanRepository.CheckBan(steamId, remoteIp, hwid))
             {

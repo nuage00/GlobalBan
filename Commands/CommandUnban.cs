@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
 using Microsoft.Extensions.Localization;
 using OpenMod.API.Plugins;
 using OpenMod.API.Users;
 using OpenMod.Core.Commands;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
+using Pustalorc.PlayerInfoLib.Unturned;
 using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 
 namespace Pustalorc.GlobalBan.Commands
@@ -19,18 +21,17 @@ namespace Pustalorc.GlobalBan.Commands
         private readonly IStringLocalizer m_StringLocalizer;
         private readonly IUserManager m_UserManager;
         private readonly IPluginAccessor<GlobalBanPlugin> m_Plugin;
-        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IPluginAccessor<PlayerInfoLibrary> m_PilPlugin;
         private readonly IGlobalBanRepository m_GlobalBanRepository;
 
         public CommandUnban(IStringLocalizer stringLocalizer, IUserManager userManager,
-            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPlayerInfoRepository playerInfoRepository,
-            IGlobalBanRepository globalBanRepository, IServiceProvider serviceProvider) :
+            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPluginAccessor<PlayerInfoLibrary> pilPlugin, IGlobalBanRepository globalBanRepository, IServiceProvider serviceProvider) :
             base(serviceProvider)
         {
             m_UserManager = userManager;
             m_StringLocalizer = stringLocalizer;
             m_Plugin = globalBanPlugin;
-            m_PlayerInfoRepository = playerInfoRepository;
+            m_PilPlugin = pilPlugin;
             m_GlobalBanRepository = globalBanRepository;
         }
 
@@ -38,9 +39,10 @@ namespace Pustalorc.GlobalBan.Commands
         {
             var actor = Context.Actor;
 
+            var pilRepository = m_PilPlugin.Instance.LifetimeScope.Resolve<IPlayerInfoRepository>();
             var target = await Context.Parameters.GetAsync<string>(0);
             var unbans = await m_GlobalBanRepository.UnbanAutoFindAsync(target, BanSearchMode.All);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
+            var pData = await pilRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
 
             if (unbans.Count == 0)
             {
@@ -68,7 +70,7 @@ namespace Pustalorc.GlobalBan.Commands
                 return;
             }
 
-            var data = await m_PlayerInfoRepository.FindPlayerAsync(playerId.ToString(), UserSearchMode.FindById);
+            var data = await pilRepository.FindPlayerAsync(playerId.ToString(), UserSearchMode.FindById);
             var charName = data?.CharacterName ?? playerId.ToString();
             var translated =
                 m_StringLocalizer["commands:unban:unbanned", new {Target = charName, BanCount = unbans.Count}];

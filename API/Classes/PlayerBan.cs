@@ -12,9 +12,8 @@ namespace Pustalorc.GlobalBan.API.Classes
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        [Column("PlayerId", TypeName = "BIGINT UNSIGNED")]
         [Required]
-        public ulong PlayerId { get; set; }
+        public string PlayerId { get; set; }
 
         [Required] public long Ip { get; set; }
 
@@ -23,10 +22,9 @@ namespace Pustalorc.GlobalBan.API.Classes
         [DefaultValue("")]
         public string Hwid { get; set; }
 
-        [Column("AdminId", TypeName = "BIGINT UNSIGNED")]
         [Required]
         [DefaultValue(0ul)]
-        public ulong AdminId { get; set; }
+        public string AdminId { get; set; }
 
         [Required]
         [StringLength(512)]

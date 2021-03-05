@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Autofac;
 using Cysharp.Threading.Tasks;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using OpenMod.Core.Users;
 using OpenMod.Unturned.Users;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.Services;
+using Pustalorc.PlayerInfoLib.Unturned;
 using Pustalorc.PlayerInfoLib.Unturned.API.Services;
 using SDG.Unturned;
 using Steamworks;
@@ -28,19 +30,18 @@ namespace Pustalorc.GlobalBan.Commands
         private readonly IStringLocalizer m_StringLocalizer;
         private readonly IUserManager m_UserManager;
         private readonly IPluginAccessor<GlobalBanPlugin> m_Plugin;
-        private readonly IPlayerInfoRepository m_PlayerInfoRepository;
+        private readonly IPluginAccessor<PlayerInfoLibrary> m_PilPlugin;
         private readonly IGlobalBanRepository m_GlobalBanRepository;
         private readonly ILogger<CommandSlay> m_Logger;
 
         public CommandSlay(IStringLocalizer stringLocalizer, IUserManager userManager,
-            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPlayerInfoRepository playerInfoRepository,
-            IGlobalBanRepository globalBanRepository, ILogger<CommandSlay> logger, IServiceProvider serviceProvider) :
+            IPluginAccessor<GlobalBanPlugin> globalBanPlugin, IPluginAccessor<PlayerInfoLibrary> pilPlugin, IGlobalBanRepository globalBanRepository, ILogger<CommandSlay> logger, IServiceProvider serviceProvider) :
             base(serviceProvider)
         {
             m_UserManager = userManager;
             m_StringLocalizer = stringLocalizer;
             m_Plugin = globalBanPlugin;
-            m_PlayerInfoRepository = playerInfoRepository;
+            m_PilPlugin = pilPlugin;
             m_GlobalBanRepository = globalBanRepository;
             m_Logger = logger;
         }
@@ -55,9 +56,10 @@ namespace Pustalorc.GlobalBan.Commands
             if (Context.Parameters.Count >= 2)
                 reason = Context.Parameters.GetArgumentLine(1);
 
+            var pilRepository = m_PilPlugin.Instance.LifetimeScope.Resolve<IPlayerInfoRepository>();
             // Try to find user to ban
             var user = await m_UserManager.FindUserAsync(KnownActorTypes.Player, target, UserSearchMode.FindByNameOrId);
-            var pData = await m_PlayerInfoRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
+            var pData = await pilRepository.FindPlayerAsync(target, UserSearchMode.FindByNameOrId);
             var isId = ulong.TryParse(target, out var pId) && pId >= 76561197960265728 && pId <= 103582791429521408;
 
             if (!(user is UnturnedUser) && pData == null && !isId)
@@ -87,7 +89,7 @@ namespace Pustalorc.GlobalBan.Commands
             }
             else if (pData != null)
             {
-                steamId = (CSteamID) pData.Id;
+                steamId = (CSteamID) ulong.Parse(pData.Id);
                 characterName = pData.CharacterName;
                 ip = (uint) pData.Ip;
                 hwid = pData.Hwid;
@@ -100,7 +102,7 @@ namespace Pustalorc.GlobalBan.Commands
                 hwid = "";
             }
 
-            var server = await m_PlayerInfoRepository.GetCurrentServerAsync();
+            var server = await pilRepository.GetCurrentServerAsync();
             await m_GlobalBanRepository.BanPlayerAsync(server?.Id ?? 0, steamId.m_SteamID, ip, hwid, uint.MaxValue,
                 adminId, reason);
 
