@@ -1,4 +1,4 @@
-﻿// ReSharper disable AnnotateNotNullParameter
+// ReSharper disable AnnotateNotNullParameter
 // ReSharper disable AnnotateNotNullTypeMember
 
 using System;
@@ -7,12 +7,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Cysharp.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using OpenMod.API.Plugins;
 using OpenMod.API.Users;
-using OpenMod.EntityFrameworkCore.Extensions;
 using OpenMod.Unturned.Plugins;
 using Pustalorc.GlobalBan.API.Enums;
 using Pustalorc.GlobalBan.API.External;
@@ -62,7 +62,7 @@ namespace Pustalorc.GlobalBan
             // Event nelson added to check if someone is banned yourself. Uses correct Banned removal if isBanned is returned to true.
             Provider.onCheckBanStatusWithHWID += CheckBanned;
 
-            await m_GlobalBanDbContext.OpenModMigrateAsync();
+            await m_GlobalBanDbContext.Database.MigrateAsync();
 
             m_Logger.LogInformation("Global Ban for Unturned by Pustalorc was loaded correctly.");
         }
