@@ -1,5 +1,5 @@
-﻿using OpenMod.API.Plugins;
-using OpenMod.EntityFrameworkCore.Extensions;
+using OpenMod.API.Plugins;
+using OpenMod.EntityFrameworkCore.MySql.Extensions;
 using Pustalorc.GlobalBan.Database;
 
 namespace Pustalorc.GlobalBan
@@ -8,8 +8,7 @@ namespace Pustalorc.GlobalBan
     {
         public void ConfigureContainer(IPluginServiceConfigurationContext context)
         {
-            context.ContainerBuilder.AddEntityFrameworkCoreMySql();
-            context.ContainerBuilder.AddDbContext<GlobalBanDbContext>();
+            context.ContainerBuilder.AddMySqlDbContext<GlobalBanDbContext>();
         }
     }
 }
