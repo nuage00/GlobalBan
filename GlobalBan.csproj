@@ -9,10 +9,10 @@
     <GenerateNugetPackage>true</GenerateNugetPackage>
     <Product>Global Ban</Product>
     <Version>3.3.0</Version>
-    <Authors>Pustalorc</Authors>
+    <Authors>Pustalorc, Nuage</Authors>
     <PackageId>Pustalorc.GlobalBan</PackageId>
     <Description>Manages bans through OpenMod.Unturned with MySql</Description>
-    <Copyright>Copyright © 2020 Pustalorc</Copyright>
+    <Copyright>Copyright © 2020-2021 Pustalorc, Nuage</Copyright>
     <PackageProjectUrl>https://github.com/Pustalorc/GlobalBan</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Pustalorc/GlobalBan</RepositoryUrl>
     <RepositoryType>Github</RepositoryType>

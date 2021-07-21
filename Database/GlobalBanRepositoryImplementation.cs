@@ -64,7 +64,7 @@ namespace Pustalorc.GlobalBan.Database
             if (!ulong.TryParse(searchTerm, out var id) || id < 76561197960265728 || id > 103582791429521408)
                 return m_DbContext.PlayerBans.Take(0);
 
-            return m_DbContext.PlayerBans.Where(k => k.PlayerId.Equals(id.ToString(), StringComparison.OrdinalIgnoreCase));
+            return m_DbContext.PlayerBans.Where(k => k.PlayerId == id);
         }
 
         private IQueryable<PlayerBan> GetBansByIp(string searchTerm)
@@ -192,11 +192,11 @@ namespace Pustalorc.GlobalBan.Database
             return new PlayerBan
             {
                 Duration = duration,
-                AdminId = adminId.ToString(),
+                AdminId = adminId,
                 Hwid = hwid,
                 Ip = ip,
                 IsUnbanned = false,
-                PlayerId = playerId.ToString(),
+                PlayerId = playerId,
                 Reason = reason,
                 ServerId = serverId,
                 TimeOfBan = DateTime.Now

@@ -63,7 +63,7 @@ namespace Pustalorc.GlobalBan.Commands
             {
                 var player = user as UnturnedUser;
 
-                var steamId = player?.SteamId ?? (CSteamID) ulong.Parse(pData.Id);
+                var steamId = player?.SteamId ?? (CSteamID) pData.Id;
                 var characterName = player?.DisplayName ?? pData.CharacterName;
                 var hwid = player != null ? string.Join("", player.Player.SteamPlayer.playerID.hwid) : pData.Hwid;
                 var ip = player != null ? player.Player.SteamPlayer.getIPv4AddressOrZero() : (uint) pData.Ip;

@@ -94,7 +94,7 @@ namespace Pustalorc.GlobalBan.Commands
             }
             else if (pData != null)
             {
-                steamId = (CSteamID) ulong.Parse(pData.Id);
+                steamId = (CSteamID) pData.Id;
                 characterName = pData.CharacterName;
                 if (shouldIpAndHwidBan)
                 {

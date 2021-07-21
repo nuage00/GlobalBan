@@ -13,9 +13,9 @@ namespace Pustalorc.GlobalBan.API.Classes
         public long Id { get; set; }
 
         [Required]
-        public string PlayerId { get; set; }
+        public ulong PlayerId { get; set; }
 
-        [Required] public long Ip { get; set; }
+        [Required] public uint Ip { get; set; }
 
         [Required]
         [StringLength(64)]
@@ -24,7 +24,7 @@ namespace Pustalorc.GlobalBan.API.Classes
 
         [Required]
         [DefaultValue(0ul)]
-        public string AdminId { get; set; }
+        public ulong AdminId { get; set; }
 
         [Required]
         [StringLength(512)]
@@ -33,7 +33,7 @@ namespace Pustalorc.GlobalBan.API.Classes
 
         [Required]
         [DefaultValue(uint.MaxValue)]
-        public long Duration { get; set; }
+        public uint Duration { get; set; }
 
         [Required] public int ServerId { get; set; }
 

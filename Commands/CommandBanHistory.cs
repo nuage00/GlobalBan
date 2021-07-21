@@ -81,7 +81,7 @@ namespace Pustalorc.GlobalBan.Commands
             if (user is UnturnedUser unturnedUser)
                 player = unturnedUser;
 
-            var steamId = player?.SteamId ?? (CSteamID) ulong.Parse(pData.Id);
+            var steamId = player?.SteamId ?? (CSteamID) pData.Id;
             var characterName = player?.DisplayName ?? pData.CharacterName;
 
             var allBans = await m_GlobalBanRepository.FindBansAsync(steamId.ToString(), BanSearchMode.Id);

@@ -24,7 +24,7 @@ using SDG.Unturned;
 using Math = System.Math;
 
 [assembly:
-    PluginMetadata("Pustalorc.GlobalBan", Author = "Pustalorc", DisplayName = "Global Ban",
+    PluginMetadata("Pustalorc.GlobalBan", Author = "Pustalorc, Nuage", DisplayName = "Global Ban",
         Website = "https://github.com/Pustalorc/GlobalBan/")]
 
 namespace Pustalorc.GlobalBan
