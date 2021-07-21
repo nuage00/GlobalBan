@@ -1,8 +1,8 @@
-﻿using OpenMod.EntityFrameworkCore;
+using OpenMod.EntityFrameworkCore.MySql;
 
 namespace Pustalorc.GlobalBan.Database
 {
-    public class GlobalBanDbContextFactory : OpenModDbContextFactory<GlobalBanDbContext>
+    public class GlobalBanDbContextFactory : OpenModMySqlDbContextFactory<GlobalBanDbContext>
     {
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using MySql.Data.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Pustalorc.GlobalBan.Migrations
 {
@@ -13,7 +13,7 @@ namespace Pustalorc.GlobalBan.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<long>(type: "BIGINT UNSIGNED", nullable: false),
                     Ip = table.Column<long>(nullable: false),
                     Hwid = table.Column<string>(maxLength: 64, nullable: false),
