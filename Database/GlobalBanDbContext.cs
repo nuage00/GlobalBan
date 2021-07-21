@@ -7,7 +7,7 @@ namespace Pustalorc.GlobalBan.Database
 {
     public class GlobalBanDbContext : OpenModDbContext<GlobalBanDbContext>
     {
-        public DbSet<PlayerBan> PlayerBans { get; set; }
+        public DbSet<PlayerBan> PlayerBans => Set<PlayerBan>();
 
         public GlobalBanDbContext(DbContextOptions<GlobalBanDbContext> options,
             IServiceProvider serviceProvider) : base(options, serviceProvider)
