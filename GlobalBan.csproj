@@ -4,21 +4,23 @@
     <TargetFramework>net461</TargetFramework>
     <PackageLicenseExpression>EUPL-1.2</PackageLicenseExpression>
 	<PackageTags>openmod openmod-plugin unturned</PackageTags>
-	<RootNamespace>Pustalorc.PlayerInfoLib.Unturned</RootNamespace>
+	<RootNamespace>Pustalorc.GlobalBan</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateNugetPackage>true</GenerateNugetPackage>
-    <Product>Player Info Library</Product>
-    <AssemblyName>Pustalorc.PlayerInfoLib.Unturned</AssemblyName>
-    <LangVersion>8</LangVersion>
-    <Description>A library to store more information about unturned players.</Description>
-    <PackageReleaseNotes>Updated to latest OpenMod version.
-Fixed an issue with IPs always being 0.</PackageReleaseNotes>
-    <RepositoryUrl>https://github.com/Pustalorc/PlayerInfoLib</RepositoryUrl>
-    <RepositoryType>Github</RepositoryType>
-    <PackageProjectUrl>https://github.com/Pustalorc/PlayerInfoLib</PackageProjectUrl>
-    <Copyright>Copyright © 2020 Pustalorc</Copyright>
+    <Product>Global Ban</Product>
     <Version>3.3.0</Version>
     <Authors>Pustalorc</Authors>
+    <PackageId>Pustalorc.GlobalBan</PackageId>
+    <Description>Manages bans through OpenMod.Unturned with MySql</Description>
+    <Copyright>Copyright © 2020 Pustalorc</Copyright>
+    <PackageProjectUrl>https://github.com/Pustalorc/GlobalBan</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Pustalorc/GlobalBan</RepositoryUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageReleaseNotes>Update to latest OpenMod version.
+Fix IP retrieval issues.
+Fix session termination issues.</PackageReleaseNotes>
+    <AssemblyName>Pustalorc.GlobalBan</AssemblyName>
+    <UserSecretsId>072ee54b-9ca3-4daf-a982-5a79d6814f1d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +28,7 @@ Fixed an issue with IPs always being 0.</PackageReleaseNotes>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="morelinq" Version="3.3.2" />
     <PackageReference Include="OpenMod.EntityFrameworkCore.MySql" Version="3.1.3" />
     <PackageReference Include="OpenMod.Unturned" Version="3.1.3" />
 	<PackageReference Include="OpenMod.Unturned.Redist" Version="3.21.21" />
@@ -37,11 +40,13 @@ Fixed an issue with IPs always being 0.</PackageReleaseNotes>
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.2.6" />
+    <PackageReference Include="Pustalorc.PlayerInfoLib.Unturned" Version="3.3.0" />
+    <PackageReference Include="RestSharp" Version="106.12.0" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="config.yaml" />
     <EmbeddedResource Include="translations.yaml" />
   </ItemGroup>
+
 </Project>
