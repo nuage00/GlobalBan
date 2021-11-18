@@ -38,3 +38,8 @@ The database currently stores the following values:
 - The Server ID related to the ban [See PIL's Servers table] (ServerId)
 - The Date when the player has been banned (TimeOfBan)
 - If this ban no longer counts no matter of the time remaining (IsUnbanned)
+
+##Installation
+
+ - `openmod install Pustalorc.GlobalBan`
+ - Configure the plugin.
